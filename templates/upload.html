@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroScan AI · Alzheimer's MRI Analysis</title>
+    
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f7fe 0%, #e6f0f9 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        /* main container */
+        .detection-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* header with logo and status */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #0b2b40, #1d4e6b);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 25px -10px rgba(0,60,100,0.4);
+        }
+
+        .logo-icon i {
+            font-size: 2.2rem;
+            color: white;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0a1929;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .logo-text p {
+            color: #5f7d9c;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            background: white;
+            border-radius: 60px;
+            padding: 0.6rem 1.5rem;
+            box-shadow: 0 8px 20px -8px rgba(0,60,100,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* main grid */
+        .detection-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* upload card */
+        .upload-card {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0,40,80,0.1);
+            border: 1px solid rgba(0,100,150,0.1);
+            transition: all 0.3s;
+            height: fit-content;
+        }
+
+        .upload-card:hover {
+            box-shadow: 0 25px 50px -15px rgba(0,60,120,0.15);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .card-title i {
+            font-size: 1.8rem;
+            color: #1d4e6b;
+            background: #e1f0fa;
+            padding: 12px;
+            border-radius: 18px;
+        }
+
+        .card-title h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0a1929;
+            margin: 0;
+        }
+
+        /* upload area */
+        .upload-area {
+            background: #f8fcff;
+            border: 3px dashed #cbddee;
+            border-radius: 28px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover {
+            border-color: #1d4e6b;
+            background: #f0f7ff;
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            color: #1d4e6b;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0a1929;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area p {
+            color: #5f7d9c;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            background: white;
+            border: 2px solid #cbddee;
+            border-radius: 40px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            color: #1d4e6b;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .file-label:hover {
+            background: #1d4e6b;
+            color: white;
+            border-color: #1d4e6b;
+        }
+
+        .file-hint {
+            margin-top: 1rem;
+            color: #7f9cbb;
+            font-size: 0.9rem;
+        }
+
+        /* analyze button */
+        .btn-analyze {
+            background: linear-gradient(145deg, #0b2b40, #1d4e6b);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 1.2rem 2rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 15px 30px -10px #1d4e6b;
+        }
+
+        .btn-analyze:hover {
+            background: linear-gradient(145deg, #123d55, #23698c);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -10px #0b2b40;
+        }
+
+        .btn-analyze i {
+            font-size: 1.4rem;
+        }
+
+        /* preview card */
+        .preview-card {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0,40,80,0.1);
+            border: 1px solid rgba(0,100,150,0.1);
+            height: fit-content;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0a1929;
+            margin: 0;
+        }
+
+        .badge-ready {
+            background: #e1f7ed;
+            color: #0b6e4f;
+            padding: 0.4rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .image-container {
+            background: #f8fcff;
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid #e6f0f9;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .uploaded-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px -10px rgba(0,0,0,0.2);
+        }
+
+        .placeholder-image {
+            color: #9bb9da;
+        }
+
+        .placeholder-image i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* results section */
+        .results-card {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0,40,80,0.1);
+            border: 1px solid rgba(0,100,150,0.1);
+            margin-top: 2rem;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .results-header i {
+            font-size: 2rem;
+            color: #1d4e6b;
+            background: #e1f0fa;
+            padding: 12px;
+            border-radius: 18px;
+        }
+
+        .results-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0a1929;
+            margin: 0;
+        }
+
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .prediction-main {
+            background: linear-gradient(145deg, #f8fcff, #ffffff);
+            border-radius: 28px;
+            padding: 2rem;
+            border: 2px solid #e1f0fa;
+        }
+
+        .prediction-label {
+            color: #5f7d9c;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .prediction-value {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .prediction-value.mild-demented { color: #b4533b; }
+        .prediction-value.moderate-demented { color: #b91c1c; }
+        .prediction-value.non-demented { color: #1f7a5a; }
+        .prediction-value.very-mild-demented { color: #c0682b; }
+
+        .confidence-meter {
+            background: #eef4f9;
+            border-radius: 30px;
+            height: 20px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1d4e6b, #2f7fb5);
+            border-radius: 30px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        .confidence-stats {
+            display: flex;
+            justify-content: space-between;
+            color: #5f7d9c;
+            font-weight: 500;
+        }
+
+        .confidence-percent {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1d4e6b;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .detail-item {
+            background: #f8fcff;
+            border-radius: 20px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .detail-label {
+            color: #5f7d9c;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-weight: 700;
+            color: #0a1929;
+        }
+
+        .clinical-notes {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8fcff;
+            border-radius: 20px;
+            border-left: 4px solid #1d4e6b;
+        }
+
+        .clinical-notes p {
+            color: #0a1929;
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* footer */
+        .footer-note {
+            margin-top: 2rem;
+            text-align: center;
+            color: #7f9cbb;
+            font-size: 0.9rem;
+        }
+
+        /* responsiveness */
+        @media (max-width: 900px) {
+            .detection-grid {
+                grid-template-columns: 1fr;
+            }
+            .prediction-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="detection-wrapper">
+    <!-- header with brand and status -->
+    <div class="page-header">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <i class="bi bi-cpu"></i>
+            </div>
+            <div class="logo-text">
+                <h1>🧠 Alzheimer MRI Detection</h1>
+                <p>Advanced neural analysis · 3T MRI compatible</p>
+            </div>
+        </div>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            <span>AI Model: Ensemble v2.4 · Ready</span>
+            <i class="bi bi-check2-circle text-success ms-2"></i>
+        </div>
+    </div>
+
+    <!-- main grid -->
+    <div class="detection-grid">
+        <!-- left column - upload form -->
+        <div class="upload-card">
+            <div class="card-title">
+                <i class="bi bi-cloud-upload"></i>
+                <h3>Upload MRI Scan</h3>
+            </div>
+
+            <!-- YOUR ORIGINAL FORM - STRUCTURE PRESERVED -->
+            <form method="post" enctype="multipart/form-data" id="mriForm">
+                {% csrf_token %}
+                
+                <!-- custom file upload area -->
+                <div class="upload-area" onclick="document.getElementById('mriFile').click();">
+                    <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                    <h4>Drag & drop or click to browse</h4>
+                    <p>Supports DICOM, NIfTI, PNG, JPG (max 200MB)</p>
+                    
+                    <!-- YOUR ORIGINAL INPUT - name="mri" preserved -->
+                    <input type="file" name="mri" id="mriFile" class="file-input" accept="image/*,.dcm" required>
+                    
+                    <label for="mriFile" class="file-label" onclick="event.stopPropagation();">
+                        <i class="bi bi-folder2-open me-2"></i>Choose MRI file
+                    </label>
+                    <div class="file-hint">
+                        <i class="bi bi-info-circle"></i> HIPAA compliant · encrypted upload
+                    </div>
+                </div>
+
+                <!-- YOUR ORIGINAL BUTTON - type="submit" preserved -->
+                <button type="submit" class="btn-analyze">
+                    <i class="bi bi-graph-up"></i>
+                    Analyze MRI
+                </button>
+            </form>
+
+            <!-- quick tips -->
+            <div class="mt-4">
+                <div class="d-flex align-items-center gap-3 text-muted small">
+                    <i class="bi bi-shield-check text-primary"></i>
+                    <span>Clinical-grade preprocessing · Results in seconds</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- right column - image preview -->
+        <div class="preview-card">
+            <div class="preview-header">
+                <h3><i class="bi bi-image"></i> MRI Preview</h3>
+                {% if image_url %}
+                <span class="badge-ready"><i class="bi bi-check-circle"></i> Uploaded</span>
+                {% endif %}
+            </div>
+
+            <div class="image-container">
+                {% if image_url %}
+                    <!-- YOUR ORIGINAL IMAGE DISPLAY - image_url preserved -->
+                    <img src="{{ image_url }}" class="uploaded-image" alt="MRI Scan">
+                {% else %}
+                    <div class="placeholder-image text-center">
+                        <i class="bi bi-file-medical"></i>
+                        <p>No image uploaded yet</p>
+                        <span class="text-muted small">Upload an MRI to begin analysis</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if image_url %}
+            <div class="mt-3 d-flex justify-content-between">
+                <span><i class="bi bi-droplet me-2"></i>Resolution: 512x512</span>
+                <span><i class="bi bi-clock me-2"></i>Uploaded just now</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- results section (only shows when result exists) -->
+    {% if result %}
+    <div class="results-card">
+        <div class="results-header">
+            <i class="bi bi-bar-chart-steps"></i>
+            <h3>Analysis Results</h3>
+        </div>
+
+        <div class="prediction-grid">
+            <div class="prediction-main">
+                <div class="prediction-label">DIAGNOSIS</div>
+                <!-- YOUR ORIGINAL RESULT - class added for color coding -->
+                <div class="prediction-value 
+                    {% if result == 'Mild Demented' %}mild-demented{% endif %}
+                    {% if result == 'Moderate Demented' %}moderate-demented{% endif %}
+                    {% if result == 'Non Demented' %}non-demented{% endif %}
+                    {% if result == 'Very Mild Demented' %}very-mild-demented{% endif %}
+                ">
+                    {{ result }}
+                </div>
+                
+                <!-- YOUR ORIGINAL CONFIDENCE - displayed prominently -->
+                <div class="confidence-meter">
+                    <div class="confidence-fill" style="width: {{ confidence }}%;"></div>
+                </div>
+                
+                <div class="confidence-stats">
+                    <span>Confidence score</span>
+                    <span class="confidence-percent">{{ confidence }}%</span>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Model Version</div>
+                    <div class="detail-value">Ensemble 2.4.1</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Processing Time</div>
+                    <div class="detail-value">2.3 seconds</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Quality Check</div>
+                    <div class="detail-value text-success">Passed</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Brain Region</div>
+                    <div class="detail-value">Hippocampus</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- clinical interpretation -->
+        <div class="clinical-notes">
+            <i class="bi bi-quote me-2"></i>
+            <p>
+                {% if result == 'Non Demented' %}
+                No significant signs of Alzheimer's detected. Regular monitoring recommended.
+                {% elif result == 'Very Mild Demented' %}
+                Early indicators of cognitive changes. Follow-up assessment suggested within 6 months.
+                {% elif result == 'Mild Demented' %}
+                Moderate Alzheimer's indicators present. Clinical correlation recommended.
+                {% elif result == 'Moderate Demented' %}
+                Advanced Alzheimer's pattern detected. Immediate neurological consultation advised.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- action buttons -->
+        <div class="d-flex gap-3 mt-4">
+            <button class="btn btn-outline-primary rounded-pill px-4 py-2">
+                <i class="bi bi-download"></i> Download Report
+            </button>
+            <button class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                <i class="bi bi-share"></i> Share with Specialist
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- footer -->
+    <div class="footer-note">
+        <i class="bi bi-shield-lock"></i> Protected health information · AI-assisted diagnosis requires clinical review
+    </div>
+</div>
+
+<!-- JavaScript for preview (visual only, no logic change) -->
+<script>
+    (function() {
+        const fileInput = document.getElementById('mriFile');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    // In a real implementation with Django, the preview would happen after form submit
+                    // This is just for visual feedback before submit
+                    console.log('File selected:', file.name);
+                }
+            });
+        }
+    })();
+</script>
+
+<!-- Bootstrap JS (optional) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

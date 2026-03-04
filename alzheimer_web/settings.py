@@ -50,13 +50,15 @@ ROOT_URLCONF = 'alzheimer_web.urls'
 
 
 # ============================================
-# TEMPLATES SETTINGS - FIXED FOR RENDER
+# TEMPLATES SETTINGS - FIXED FOR ROOT TEMPLATES FOLDER
 # ============================================
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # This works on both local and Render
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),  # Points to root templates folder
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import login_view, verify_otp, upload_mri
+from .views import login_view, verify_view, upload_mri
 
 urlpatterns = [
     path('', login_view, name='login'),
-    path('verify/', verify_otp, name='verify'),
+    path('verify/', verify_view, name='verify'),
     path('upload/', upload_mri, name='upload'),
 ]

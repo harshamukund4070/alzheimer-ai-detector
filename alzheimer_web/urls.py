@@ -1,10 +1,7 @@
-from django.urls import path
-from detector.views import login_view, verify_view, upload_mri
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
-
-    path("", login_view, name="login"),
-    path("verify/", verify_view, name="verify"),
-    path("upload/", upload_mri, name="upload"),
-
+    path('admin/', admin.site.urls),
+    path('', include('detector.urls')),
 ]

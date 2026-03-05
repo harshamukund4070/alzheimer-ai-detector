@@ -1,6 +1,6 @@
-Django==5.0
+Django
 gunicorn
 whitenoise
-tensorflow-cpu==2.15.0  # Use CPU-only version (smaller memory footprint)
+tensorflow==2.13.0
 numpy
 pillow

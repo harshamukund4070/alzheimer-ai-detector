@@ -9,7 +9,7 @@ from tensorflow.keras.models import load_model
 
 # Use BASE_DIR to build model path — prevents deployment errors
 MODEL_PATH = os.path.join(settings.BASE_DIR, "detector", "models", "alzheimer_model.h5")
-model = load_model(MODEL_PATH)
+model = load_model(MODEL_PATH, compile=False)
 
 
 # -----------------------------

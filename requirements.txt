@@ -1,6 +1,7 @@
-Django
+django
 gunicorn
 whitenoise
-tensorflow==2.13.0
-numpy
 pillow
+numpy==1.23.5
+tensorflow==2.12.0
+keras==2.12.0

@@ -4,7 +4,8 @@ import threading
 import numpy as np
 from PIL import Image
 import h5py
-import resend
+import urllib.request
+import json
 
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -87,20 +88,36 @@ def get_model():
 # -----------------------------
 def send_email_async(subject, text_content, html_content, email):
     try:
-        resend.api_key = os.environ.get("RESEND_API_KEY")
+        api_key = os.environ.get("BREVO_API_KEY")
+        if not api_key:
+            print("BREVO_API_KEY is not set. Go to Render and add it!", flush=True)
+            return
+            
+        url = "https://api.brevo.com/v3/smtp/email"
         
-        # Resend payload. Using onboarding@resend.dev which requires
-        # you to send emails ONLY to the email address you verified with Resend.
-        params = {
-            "from": "Harsha AI Platform <onboarding@resend.dev>",
-            "to": [email],
+        # The sender email must be exactly the email you verify on Brevo
+        sender_email = os.environ.get("SENDER_EMAIL", "harshamukundhaaripaka@gmail.com") 
+        
+        payload = {
+            "sender": {"name": "Harsha AI Platform", "email": sender_email},
+            "to": [{"email": email}],
             "subject": subject,
-            "html": html_content,
+            "htmlContent": html_content
         }
-        resend.Emails.send(params)
-        print(f"Successfully sent Resend email to {email}", flush=True)
+        
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(url, data=data, headers={
+            'accept': 'application/json',
+            'api-key': api_key,
+            'content-type': 'application/json'
+        }, method='POST')
+        
+        with urllib.request.urlopen(req) as response:
+            response_data = response.read()
+            print(f"Successfully sent Brevo email to {email}", flush=True)
+            
     except Exception as e:
-        print(f"Failed to send email via Resend API: {e}", flush=True)
+        print(f"Failed to send email via Brevo API: {e}", flush=True)
 
 
 # -----------------------------

@@ -95,7 +95,7 @@ def send_email_async(subject, text_content, html_content, email):
         email_message.attach_alternative(html_content, "text/html")
         email_message.send()
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email (Expected on Render Free Tier): {e}", flush=True)
 
 
 # -----------------------------
@@ -108,6 +108,13 @@ def login_view(request):
         email = request.POST.get("email")
 
         otp = str(random.randint(100000, 999999))
+        
+        # Render Free Tier blocks outgoing emails. 
+        # We print the OTP to the console so we can still test the app!
+        print(f"\n{'='*50}", flush=True)
+        print(f"🚨 RENDER FREE TIER BYPASS 🚨", flush=True)
+        print(f"OTP for {email} is: {otp}", flush=True)
+        print(f"{'='*50}\n", flush=True)
 
         request.session["otp"] = otp
         request.session["email"] = email

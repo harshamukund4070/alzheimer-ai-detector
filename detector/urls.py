@@ -10,5 +10,9 @@ urlpatterns = [
     path("upload/", views.upload_page, name="upload"),
 
     path("predict/", views.predict_mri, name="predict"),
+    
+    path("resend-otp/", views.resend_otp, name="resend_otp"),
+    
+    path("logout/", views.logout_view, name="logout"),
 
 ]

@@ -337,3 +337,53 @@ def predict_mri(request):
                 "error": f"An error occurred during prediction: {str(e)}"
             })
     return render(request, "upload.html")
+
+
+# -----------------------------
+# RESEND OTP
+# -----------------------------
+def resend_otp(request):
+    email = request.session.get("email")
+    if email:
+        otp = str(random.randint(100000, 999999))
+        
+        print(f"\n{'='*50}", flush=True)
+        print(f"🚨 RESENT OTP 🚨", flush=True)
+        print(f"New OTP for {email} is: {otp}", flush=True)
+        print(f"{'='*50}\n", flush=True)
+
+        request.session["otp"] = otp
+
+        subject = "Harsha Pvt Limited – Your Resent Login OTP"
+        text_content = f"Your new OTP is {otp}. Valid for 5 minutes."
+        
+        # Simple HTML for the resend
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4;">
+            <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block;">
+                <h2 style="color: #333;">Login Verification</h2>
+                <p style="color: #666; font-size: 16px;">Your new One-Time Password is:</p>
+                <div style="background-color: #007bff; color: white; padding: 15px 30px; border-radius: 5px; font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
+                    {otp}
+                </div>
+                <p style="color: #999; font-size: 12px;">Valid for 5 minutes. Do not share this code.</p>
+            </div>
+        </div>
+        """
+
+        # Start thread to send email
+        email_thread = threading.Thread(
+            target=send_email_async,
+            args=(subject, text_content, html_content, email)
+        )
+        email_thread.start()
+
+    return redirect("verify")
+
+
+# -----------------------------
+# LOGOUT VIEW
+# -----------------------------
+def logout_view(request):
+    request.session.flush()
+    return redirect("login")

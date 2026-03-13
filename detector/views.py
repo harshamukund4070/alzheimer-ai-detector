@@ -4,6 +4,7 @@ import threading
 import numpy as np
 from PIL import Image
 import h5py
+import resend
 
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -86,16 +87,20 @@ def get_model():
 # -----------------------------
 def send_email_async(subject, text_content, html_content, email):
     try:
-        email_message = EmailMultiAlternatives(
-            subject,
-            text_content,
-            settings.EMAIL_HOST_USER,
-            [email]
-        )
-        email_message.attach_alternative(html_content, "text/html")
-        email_message.send()
+        resend.api_key = os.environ.get("RESEND_API_KEY")
+        
+        # Resend payload. Using onboarding@resend.dev which requires
+        # you to send emails ONLY to the email address you verified with Resend.
+        params = {
+            "from": "Harsha AI Platform <onboarding@resend.dev>",
+            "to": [email],
+            "subject": subject,
+            "html": html_content,
+        }
+        resend.Emails.send(params)
+        print(f"Successfully sent Resend email to {email}", flush=True)
     except Exception as e:
-        print(f"Failed to send email (Expected on Render Free Tier): {e}", flush=True)
+        print(f"Failed to send email via Resend API: {e}", flush=True)
 
 
 # -----------------------------

@@ -1,0 +1,12 @@
+Attempting to load model...
+Error: 'str' object has no attribute 'as_list'
+Traceback (most recent call last):
+  File "C:\Users\harsh\alzheimer_web\capture_error.py", line 13, in capture_error
+    model = tf.keras.models.load_model(model_path)
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python310\lib\site-packages\keras\saving\saving_api.py", line 212, in load_model
+    return legacy_sm_saving_lib.load_model(
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python310\lib\site-packages\keras\utils\traceback_utils.py", line 70, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python310\lib\site-packages\keras\engine\functional.py", line 1382, in process_node
+    input_data = input_data.as_list()
+AttributeError: 'str' object has no attribute 'as_list'

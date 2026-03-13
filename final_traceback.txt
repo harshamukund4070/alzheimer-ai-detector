@@ -1,0 +1,75 @@
+﻿python :   File 
+"<string>", line 1
+At line:1 char:1
++ python -c "import 
+traceback; import h5py; 
+from keras.models import 
+Se ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (  F  
+  ile "<string>", line 1   
+ :String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+    import traceback; 
+import h5py; from 
+keras.models import 
+Sequential; from 
+keras.layers import Dense, 
+GlobalAveragePooling2D, 
+Dropout; from 
+keras.applications import 
+MobileNetV2; base_model = 
+MobileNetV2(weights=None, 
+include_top=False, 
+input_shape=(224, 224, 
+3)); base_model._name = 
+'mobilenetv2_1.00_224'; 
+classifier = 
+Sequential([Dense(128, 
+activation='relu', 
+name='dense'), 
+Dropout(0.5, 
+name='dropout'), Dense(1, 
+activation='sigmoid', 
+name='dense_1')], 
+name='sequential'); model 
+= Sequential([base_model, G
+lobalAveragePooling2D(name=
+'global_average_pooling2d')
+, classifier]); 
+print('Loading...'); try: m
+odel.load_weights('detector
+/models/alzheimer_model.h5'
+, by_name=True) except 
+Exception: 
+traceback.print_exc()
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+         ^^^
+SyntaxError: invalid syntax

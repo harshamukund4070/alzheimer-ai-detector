@@ -484,6 +484,14 @@
         </div>
 
         <!-- main grid -->
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show rounded-pill px-4 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
         <div class="detection-grid">
 
             <!-- left — upload form -->

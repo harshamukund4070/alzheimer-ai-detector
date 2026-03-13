@@ -1,10 +1,13 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # -------------------------------------------------
 # BASE DIRECTORY
 # -------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 
 # -------------------------------------------------
@@ -19,8 +22,11 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     "alzheimer-ai-detector-1.onrender.com",
+    ".onrender.com",
+    ".railway.app",
     "localhost",
     "127.0.0.1",
+    "*",  # allow all during initial deploy
 ]
 
 
@@ -131,7 +137,7 @@ USE_TZ = True
 # -------------------------------------------------
 STATIC_URL = "/static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
@@ -141,7 +147,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # -------------------------------------------------
 MEDIA_URL = "/media/"
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # -------------------------------------------------

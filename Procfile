@@ -1,1 +1,1 @@
-web: gunicorn alzheimer_web.wsgi
+web: gunicorn alzheimer_web.wsgi --bind 0.0.0.0:$PORT --timeout 120 --workers 1

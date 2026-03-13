@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Static files (collected)
+staticfiles/
+
+# Media uploads
+media/
+
+# Environment
+.env
+.venv
+env/
+venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary test files
+verify_fix.py
+get_traceback*.py
+detailed_trace.txt
+*_trace.txt
+*_output.txt
+*.log
+full_scan.py
+robust_load.py

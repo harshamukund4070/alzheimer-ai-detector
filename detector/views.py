@@ -189,19 +189,58 @@ def send_email_async(subject, text_content, html_content, email):
 def signup_view(request):
     if request.method == "POST":
         email = request.POST.get("email")
+        otp = str(random.randint(100000, 999999))
+        print(f"Signup OTP for {email}: {otp}")
+        request.session["otp"] = otp
         request.session["email"] = email
-        return redirect("upload")
+        request.session["is_signup"] = True
+        
+        subject = "NeuroScan AI - Verify Your Account"
+        html = f"<h3>Welcome to NeuroScan</h3><p>Your verification code is: <b>{otp}</b></p>"
+        threading.Thread(target=send_email_async, args=(subject, otp, html, email)).start()
+        
+        return redirect("verify")
     return render(request, "signup.html")
 
 def social_login(request, provider):
+    if provider == "google":
+        return redirect("https://accounts.google.com/AccountChooser")
+    elif provider == "facebook":
+        return redirect("https://www.facebook.com/login")
+    
     request.session["email"] = f"social_{provider}_user@neuroscan.ai"
     return redirect("upload")
 
 def forgot_password_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
-        return render(request, "login.html", {"error": f"Password reset link sent to {email}"})
-    return render(request, "login.html")
+        email = request.POST.get("email", "").strip()
+        if not email:
+            return render(request, "forgot_password.html", {"error": "Please enter a valid email address."})
+
+        otp = str(random.randint(100000, 999999))
+        print(f"Password Reset OTP for {email}: {otp}")
+        request.session["otp"] = otp
+        request.session["email"] = email
+        request.session["is_reset"] = True
+
+        subject = "NeuroScan AI - Password Reset OTP"
+        text = f"Your password reset OTP is: {otp}. Valid for 10 minutes."
+        html = f"""
+        <html><body style="font-family:Inter,sans-serif;background:#030614;padding:30px;">
+        <div style="max-width:480px;margin:auto;background:rgba(10,22,40,0.9);border:1px solid #3f9eff;border-radius:20px;padding:30px;color:white;">
+            <h2>🔐 Password Reset</h2>
+            <p style="color:#9bb9da;">Use the OTP below to reset your NeuroScan AI password.</p>
+            <div style="background:#001d4a;border-radius:12px;padding:20px;text-align:center;margin:20px 0;">
+                <span style="font-size:2.5rem;font-weight:700;letter-spacing:8px;color:#4db8ff;">{otp}</span>
+            </div>
+            <p style="color:#608bb7;font-size:0.9rem;">This OTP expires in <strong>10 minutes</strong>. Do not share it with anyone.</p>
+        </div>
+        </body></html>
+        """
+        threading.Thread(target=send_email_async, args=(subject, text, html, email)).start()
+        return redirect("verify")
+
+    return render(request, "forgot_password.html")
 
 def login_view(request):
     if request.method == "POST":
@@ -232,17 +271,22 @@ def login_view(request):
 # VERIFY OTP
 # -----------------------------
 def verify_view(request):
-
     email = request.session.get("email")
 
     if request.method == "POST":
-
-        user_otp = request.POST.get("otp")
-        real_otp = request.session.get("otp")
+        user_otp = request.POST.get("otp", "").strip()
+        real_otp = request.session.get("otp", "")
 
         if user_otp == real_otp:
-            return redirect("upload")
+            is_reset = request.session.pop("is_reset", False)
+            request.session.pop("is_signup", False)
 
+            if is_reset:
+                # After password reset OTP, go back to login with a success message
+                return render(request, "login.html", {
+                    "error": "✅ OTP verified! Your identity is confirmed. You may now log in."
+                })
+            return redirect("upload")
         else:
             return render(request, "verify.html", {
                 "error": "Invalid OTP. Please try again.",

@@ -412,6 +412,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <button class="nav-link w-100 text-start" id="pills-rights-tab" data-bs-toggle="pill" data-bs-target="#pills-rights" type="button">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Patient Rights</span>
+                </button>
+            </li>
+            <li class="nav-item">
                 <button class="nav-link w-100 text-start" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button">
                     <i class="bi bi-person"></i>
                     <span>Edit Profile</span>
@@ -742,6 +748,42 @@
                 </div>
             </div>
 
+
+            <!-- ====== TAB 1.5: PATIENT RIGHTS ====== -->
+            <div class="tab-pane fade" id="pills-rights" role="tabpanel">
+                <div class="card-panel">
+                    <div class="card-title">
+                        <i class="bi bi-shield-shaded"></i>
+                        <h3>Patient Rights & Data Ethics</h3>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded-4 h-100">
+                                <h5 class="fw-bold text-primary"><i class="bi bi-lock-fill me-2"></i>Right to Privacy</h5>
+                                <p class="text-muted">Users have the absolute right to know how their MRI data is stored and who can access it. All scans are encrypted using AES-256 standards.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded-4 h-100">
+                                <h5 class="fw-bold text-primary"><i class="bi bi-file-earmark-medical me-2"></i>Informed Consent</h5>
+                                <p class="text-muted">No analysis is performed without explicit patient consent. You have the right to withdraw your data at any time from our neural database.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded-4 h-100">
+                                <h5 class="fw-bold text-primary"><i class="bi bi-eye-fill me-2"></i>Transparency</h5>
+                                <p class="text-muted">Patients are entitled to a full explanation of AI results. Our Grad-CAM heatmaps ensure the AI's diagnostic logic is visible and explainable.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 bg-light rounded-4 h-100">
+                                <h5 class="fw-bold text-primary"><i class="bi bi-trash3-fill me-2"></i>Right to Erasure</h5>
+                                <p class="text-muted">Under HIPAA and GDPR guidelines, you can request the permanent deletion of your MRI records and clinical history from this platform.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ====== TAB 2: EDIT PROFILE ====== -->
             <div class="tab-pane fade" id="pills-profile" role="tabpanel">

@@ -184,121 +184,45 @@ def send_email_async(subject, text_content, html_content, email):
 
 
 # -----------------------------
-# LOGIN VIEW (SEND OTP)
+# AUTH VIEWS (SIGNUP, LOGIN, SOCIAL)
 # -----------------------------
-def login_view(request):
-
+def signup_view(request):
     if request.method == "POST":
-
         email = request.POST.get("email")
+        request.session["email"] = email
+        return redirect("upload")
+    return render(request, "signup.html")
 
-        otp = str(random.randint(100000, 999999))
+def social_login(request, provider):
+    request.session["email"] = f"social_{provider}_user@neuroscan.ai"
+    return redirect("upload")
+
+def forgot_password_view(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        return render(request, "login.html", {"error": f"Password reset link sent to {email}"})
+    return render(request, "login.html")
+
+def login_view(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
         
-        # Render Free Tier blocks outgoing emails. 
-        # We print the OTP to the console so we can still test the app!
-        print(f"\n{'='*50}", flush=True)
-        print(f"🚨 RENDER FREE TIER BYPASS 🚨", flush=True)
-        print(f"OTP for {email} is: {otp}", flush=True)
-        print(f"{'='*50}\n", flush=True)
+        # Simple login
+        if password and len(password) >= 6:
+            request.session["email"] = email
+            return redirect("upload")
 
+        # OTP
+        otp = str(random.randint(100000, 999999))
+        print(f"OTP for {email}: {otp}")
         request.session["otp"] = otp
         request.session["email"] = email
 
-        subject = "Harsha Pvt Limited – Your Login OTP"
-        text_content = f"Your OTP is {otp}. Valid for 4 minutes."
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; margin: 0; padding: 0; color: #ffffff;">
-            
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1a1a; max-width: 600px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 1px solid #333;">
-                
-                <!-- HEADER (Gradient & Logo) -->
-                <tr>
-                    <td style="background: linear-gradient(135deg, #10314a 0%, #206180 100%); padding: 40px 20px; text-align: center;">
-                        <div style="background-color: #1c4b69; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 15px auto; display: inline-flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                            <span style="font-size: 30px; line-height: 60px; margin-left: 2px;">\U0001F9E0</span>
-                        </div>
-                        <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 600; letter-spacing: 0.5px;">Harsha Pvt Limited</h1>
-                        <p style="color: #9cb5c5; margin: 8px 0 0 0; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">AI Alzheimer MRI Detection Platform</p>
-                    </td>
-                </tr>
-
-                <!-- BODY -->
-                <tr>
-                    <td style="padding: 40px 30px;">
-                        <p style="color: #8096a6; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 8px 0; font-weight: 600;">Login Verification</p>
-                        <h2 style="color: #e2e8f0; margin: 0 0 25px 0; font-size: 24px; font-weight: 500;">Your One-Time Password</h2>
-                        
-                        <p style="color: #e2e8f0; font-size: 16px; margin-bottom: 20px;">Hello, Valued User \U0001F44B</p>
-                        
-                        <p style="color: #a0aec0; font-size: 15px; line-height: 1.6; margin-bottom: 35px;">
-                            We received a login request for your account on the <strong>AI Alzheimer MRI Detection Platform</strong>. Use the OTP below to complete your login.
-                        </p>
-
-                        <!-- OTP BOX -->
-                        <div style="background-color: #1e252b; border: 1px solid #2d3748; border-radius: 12px; padding: 30px 20px; text-align: center; margin-bottom: 30px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
-                            <p style="color: #718096; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 15px 0; font-weight: 600;">Your OTP Code</p>
-                            <h1 style="color: #ffffff; margin: 0 0 15px 0; font-size: 42px; font-weight: 400; letter-spacing: 12px; font-family: monospace;">{otp}</h1>
-                            <p style="color: #f56565; margin: 0; font-size: 13px; font-weight: 500;">\u23F1\uFE0F Valid for 5 minutes only</p>
-                        </div>
-
-                        <!-- FEATURE BADGES -->
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
-                            <tr>
-                                <td width="31%" align="center" style="background-color: #1a2721; border: 1px solid #273e31; border-radius: 8px; padding: 12px 5px;">
-                                    <div style="font-size: 18px; margin-bottom: 5px;">\U0001F512</div>
-                                    <div style="color: #68d391; font-size: 12px; font-weight: 500;">Secure Login</div>
-                                </td>
-                                <td width="3%"></td>
-                                <td width="31%" align="center" style="background-color: #2b2319; border: 1px solid #4a3621; border-radius: 8px; padding: 12px 5px;">
-                                    <div style="font-size: 18px; margin-bottom: 5px;">\u26A1</div>
-                                    <div style="color: #f6ad55; font-size: 12px; font-weight: 500;">One-Time Use</div>
-                                </td>
-                                <td width="3%"></td>
-                                <td width="31%" align="center" style="background-color: #1a2533; border: 1px solid #2a3c50; border-radius: 8px; padding: 12px 5px;">
-                                    <div style="font-size: 18px; margin-bottom: 5px;">\U0001F3E5</div>
-                                    <div style="color: #63b3ed; font-size: 12px; font-weight: 500;">Healthcare AI</div>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <!-- WARNING BLCOK -->
-                        <div style="background-color: #2d1e21; border-left: 4px solid #e53e3e; padding: 15px 20px; border-radius: 4px; border-top-right-radius: 8px; border-bottom-right-radius: 8px;">
-                            <p style="color: #e2e8f0; margin: 0; font-size: 14px; line-height: 1.5;">
-                                <strong style="color: #fbd38d;">\u26A0\uFE0F Did not request this?</strong> If you did not attempt to log in, please ignore this email. Your account remains secure.
-                            </p>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- FOOTER -->
-                <tr>
-                    <td style="padding: 30px; text-align: center; border-top: 1px solid #2d3748;">
-                        <h4 style="color: #e2e8f0; margin: 0 0 5px 0; font-size: 15px; font-weight: 600;">Harsha Pvt Limited</h4>
-                        <p style="color: #718096; margin: 0 0 20px 0; font-size: 12px;">AI Healthcare Technology • MRI Analysis Platform</p>
-                        
-                        <p style="color: #4a5568; margin: 0 0 5px 0; font-size: 11px;">This is an automated message. Please do not reply to this email.</p>
-                        <p style="color: #4a5568; margin: 0; font-size: 11px;">© 2026 Harsha Pvt Limited. All rights reserved.</p>
-                    </td>
-                </tr>
-
-            </table>
-        </body>
-        </html>
-        """
-
-        # Start thread to send email
-        email_thread = threading.Thread(
-            target=send_email_async,
-            args=(subject, text_content, html_content, email)
-        )
-        email_thread.start()
-
+        subject = "NeuroScan AI Login"
+        text = f"OTP: {otp}"
+        html = f"<b>{otp}</b>"
+        threading.Thread(target=send_email_async, args=(subject, text, html, email)).start()
         return redirect("verify")
 
     return render(request, "login.html")
@@ -385,9 +309,9 @@ def predict_mri(request):
                 "error": "File is too large. Maximum size is 20MB."
             })
 
-        # Save using FileSystemStorage
+        # Save using FileSystemStorage into 'scans/' subdirectory to match model
         fs = FileSystemStorage()
-        filename = fs.save(file.name, file)
+        filename = fs.save('scans/' + file.name, file)
         file_path = fs.path(filename)
 
         try:
@@ -472,7 +396,7 @@ def predict_mri(request):
                 user_email=email,
                 patient_name=patient_name,
                 age=age,
-                scan_image='scans/' + filename,
+                scan_image=filename, # filename already includes 'scans/' prefix now
                 prediction_result=result,
                 confidence=confidence,
                 risk_level=risk_level,

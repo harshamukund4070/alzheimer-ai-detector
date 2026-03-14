@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up · NeuroScan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Inter", sans-serif;
+            background: #030614;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .bg-grid {
+            position: absolute;
+            width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+        }
+        .orb-1 { width: 500px; height: 500px; top: -200px; left: -100px; background: rgba(0, 212, 255, 0.15); }
+        .orb-2 { width: 600px; height: 600px; bottom: -300px; right: -150px; background: rgba(153, 0, 255, 0.1); }
+        
+        .card {
+            position: relative;
+            z-index: 10;
+            width: 460px;
+            background: rgba(15, 25, 40, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(64, 164, 255, 0.2);
+            border-radius: 40px;
+            padding: 3rem;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+        }
+        h2 { color: white; font-size: 2rem; margin-bottom: 0.5rem; }
+        p { color: #9bb9da; margin-bottom: 2rem; }
+        
+        .input-group { margin-bottom: 1.5rem; }
+        label { display: block; color: #a0c3e5; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; margin-left: 5px; }
+        input {
+            width: 100%;
+            background: rgba(0, 20, 45, 0.6);
+            border: 2px solid rgba(0, 140, 255, 0.2);
+            border-radius: 20px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        input:focus { border-color: #2a9eff; background: rgba(0, 30, 60, 0.8); }
+        
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #005fc9, #003c88);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 140, 255, 0.4); }
+        
+        .footer { text-align: center; margin-top: 2rem; color: #9bb9da; font-size: 0.9rem; }
+        .footer a { color: #2a9eff; text-decoration: none; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="card">
+        <h2>Create Account</h2>
+        <p>Join the future of neural diagnostics</p>
+
+        <form method="post" action="/signup/">
+            {% csrf_token %}
+            <div class="input-group">
+                <label>FULL NAME</label>
+                <input type="text" placeholder="Dr. John Doe" required>
+            </div>
+            <div class="input-group">
+                <label>EMAIL ADDRESS</label>
+                <input type="email" name="email" placeholder="john@hospital.org" required>
+            </div>
+            <div class="input-group">
+                <label>PASSWORD</label>
+                <input type="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit">Sign Up Now</button>
+        </form>
+
+        <div class="footer">
+            Already have an account? <a href="/">Login</a>
+        </div>
+    </div>
+</body>
+</html>

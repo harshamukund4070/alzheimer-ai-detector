@@ -203,13 +203,41 @@ def signup_view(request):
     return render(request, "signup.html")
 
 def social_login(request, provider):
-    if provider == "google":
-        return redirect("https://accounts.google.com/AccountChooser")
-    elif provider == "facebook":
-        return redirect("https://www.facebook.com/login")
-    
-    request.session["email"] = f"social_{provider}_user@neuroscan.ai"
-    return redirect("upload")
+    """
+    For social login we cannot do a real OAuth callback without client IDs.
+    Instead we show an intermediate page that collects the user's email,
+    sends an OTP, and requires verification before granting access.
+    This ensures the same OTP security layer applies to all login methods.
+    """
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        if not email:
+            return render(request, "social_login.html", {
+                "provider": provider,
+                "error": "Please enter your email address."
+            })
+        otp = str(random.randint(100000, 999999))
+        print(f"Social Login OTP ({provider}) for {email}: {otp}")
+        request.session["otp"] = otp
+        request.session["email"] = email
+        request.session["is_social"] = True
+
+        subject = f"NeuroScan AI – {provider.capitalize()} Login Verification"
+        text = f"Your OTP is: {otp}. Valid for 10 minutes."
+        html = f"""<html><body style="font-family:Inter,sans-serif;background:#030614;padding:30px;">
+        <div style="max-width:480px;margin:auto;background:rgba(10,22,40,0.9);border:1px solid #3f9eff;border-radius:20px;padding:30px;color:white;">
+            <h2>🔐 {provider.capitalize()} Login OTP</h2>
+            <p style="color:#9bb9da;">Verify your identity to complete login via {provider.capitalize()}.</p>
+            <div style="background:#001d4a;border-radius:12px;padding:20px;text-align:center;margin:20px 0;">
+                <span style="font-size:2.5rem;font-weight:700;letter-spacing:8px;color:#4db8ff;">{otp}</span>
+            </div>
+            <p style="color:#608bb7;font-size:0.9rem;">Valid for <strong>10 minutes</strong>. Do not share this OTP.</p>
+        </div></body></html>"""
+        threading.Thread(target=send_email_async, args=(subject, text, html, email)).start()
+        return redirect("verify")
+
+    # GET: show email collection page for this social provider
+    return render(request, "social_login.html", {"provider": provider})
 
 def forgot_password_view(request):
     if request.method == "POST":
@@ -304,12 +332,13 @@ def upload_page(request):
     
     # In a real app we might filter by user_email, here we'll just show all for the demo
     # records = PatientRecord.objects.filter(user_email=email)
-    records = PatientRecord.objects.all()
-    
+    # Filter records by this user's email so data persists across login/logout
+    records = PatientRecord.objects.filter(user_email=email)
+
     total_patients = records.count()
     alzheimer_cases = records.filter(prediction_result__icontains="Alzheimer").count()
     normal_cases = records.filter(prediction_result__icontains="Healthy").count()
-    
+
     recent_records = records.order_by('-date')[:5]
     
     return render(request, "upload.html", {
@@ -336,27 +365,48 @@ def info_page(request):
 # -----------------------------
 # MRI PREDICTION
 # -----------------------------
+ALLOWED_IMAGE_TYPES = {'image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/tiff'}
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif'}
+
 def predict_mri(request):
-
     if request.method == "POST":
-
-        if "mri" not in request.FILES:
+        # ── 1. Check a file was actually submitted ──
+        if "mri" not in request.FILES or request.FILES["mri"].size == 0:
             return render(request, "upload.html", {
-                "error": "No MRI image uploaded"
+                "error": "⚠️ No MRI image uploaded. Please select a file before submitting."
             })
 
         file = request.FILES["mri"]
 
-        # Check file size (e.g. 20MB max)
+        # ── 2. File size check (20 MB max) ──
         if file.size > 20 * 1024 * 1024:
             return render(request, "upload.html", {
-                "error": "File is too large. Maximum size is 20MB."
+                "error": "⚠️ File is too large. Maximum allowed size is 20 MB."
             })
 
-        # Save using FileSystemStorage into 'scans/' subdirectory to match model
+        # ── 3. File type validation (extension + MIME) ──
+        import os as _os
+        ext = _os.path.splitext(file.name)[1].lower()
+        if ext not in ALLOWED_EXTENSIONS:
+            return render(request, "upload.html", {
+                "error": f"⚠️ Invalid file type '{ext}'. Please upload a JPEG, PNG, BMP, or TIFF image."
+            })
+
+        # ── 4. Save file ──
         fs = FileSystemStorage()
         filename = fs.save('scans/' + file.name, file)
         file_path = fs.path(filename)
+
+        # ── 5. Verify it's a real image ──
+        try:
+            from PIL import Image as _PILImage
+            with _PILImage.open(file_path) as test_img:
+                test_img.verify()
+        except Exception:
+            fs.delete(filename)
+            return render(request, "upload.html", {
+                "error": "⚠️ The uploaded file could not be read as an image. Please upload a valid MRI scan."
+            })
 
         try:
             # Image preprocessing for MobileNetV2

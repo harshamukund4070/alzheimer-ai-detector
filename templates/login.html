@@ -1,447 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroScan AI · Alzheimer Detection</title>
-    <!-- Google Font & Bootstrap Icons (lightweight) -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-        rel="stylesheet">
+    <title>Welcome to RememberMe</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
+        :root {
+            --primary-bg: linear-gradient(135deg, #e6e6fa 0%, #f0f8ff 100%);
+            --card-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --btn-green: #00b894;
+            --btn-blue: #0984e3;
+            --input-border: #dfe6e9;
+            --input-focus: #00b894;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
 
         body {
-            font-family: "Inter", system-ui, -apple-system, sans-serif;
-            background: #030614;
+            background: var(--primary-bg);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow-x: hidden;
+            padding: 20px;
         }
 
-        /* animated background grid / medical abstract */
-        .bg-grid {
-            position: absolute;
+        .verify-card {
+            background: var(--card-bg);
             width: 100%;
-            height: 100%;
-            background-image:
-                linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
+            max-width: 480px;
+            padding: 3rem;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
 
-        /* floating orbs (medical / AI vibe) */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(0, 180, 255, 0.3), rgba(0, 80, 200, 0.1));
-            filter: blur(60px);
-            z-index: 0;
+        .header {
+            margin-bottom: 2.5rem;
         }
 
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            top: -150px;
-            left: -100px;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.25), rgba(9, 9, 121, 0.1));
-        }
-
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            bottom: -200px;
-            right: -150px;
-            background: radial-gradient(circle, rgba(153, 0, 255, 0.2), rgba(0, 70, 150, 0.1));
-        }
-
-        /* main card — glass panel, ultra modern */
-        .login-card {
-            position: relative;
-            z-index: 10;
-            width: 460px;
-            max-width: 92%;
-            background: rgba(15, 25, 40, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(64, 164, 255, 0.25);
-            border-radius: 48px;
-            padding: 2.8rem 2.4rem;
-            box-shadow: 0 40px 70px -20px rgba(0, 20, 60, 0.8), 0 0 0 1px rgba(0, 255, 255, 0.1) inset;
-            transition: transform 0.3s ease;
-        }
-
-        .login-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 50px 90px -15px #001c3d, 0 0 0 1px rgba(0, 200, 255, 0.3) inset;
-        }
-
-        /* header with icon & medical badge */
-        .header-icon {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 2rem;
-        }
-
-        .neuro-logo {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(145deg, #003366, #0a4d8c);
-            border-radius: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 12px 24px -8px #001d4a, 0 0 0 1px #3f9eff inset;
-        }
-
-        .neuro-logo i {
-            font-size: 2.2rem;
-            color: white;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-
-        .badge-ai {
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid rgba(0, 200, 255, 0.4);
-            border-radius: 60px;
-            padding: 6px 18px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            color: #b6f0ff;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(4px);
-        }
-
-        .badge-ai i {
-            font-size: 1rem;
-            color: #5dc9ff;
+        .shield-icon {
+            font-size: 3rem;
+            color: var(--btn-blue);
+            margin-bottom: 1rem;
         }
 
         h2 {
             font-size: 2rem;
             font-weight: 700;
-            background: linear-gradient(to right, #ffffff, #b0e0ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 0 0 0.25rem 0;
-            line-height: 1.2;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
         }
 
-        .greeting {
+        .hint {
+            color: var(--text-muted);
             font-size: 1rem;
-            color: #9bb9da;
-            margin-bottom: 2.2rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .greeting i {
-            color: #2f9eff;
-        }
-
-        /* input group — modern, floating style */
-        .input-group {
+            line-height: 1.5;
             margin-bottom: 2rem;
         }
 
-        .input-label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #a0c3e5;
-            margin-bottom: 10px;
-            margin-left: 8px;
+        .email-display {
+            font-weight: 700;
+            color: var(--text-main);
+            background: #f0f8ff;
+            padding: 4px 12px;
+            border-radius: 20px;
         }
 
-        .input-field {
-            position: relative;
-        }
-
-        .input-field i {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.3rem;
-            color: #3f8bcb;
-            z-index: 2;
+        .form-group {
+            text-align: left;
+            margin-bottom: 2rem;
         }
 
         input {
             width: 100%;
-            background: rgba(0, 20, 45, 0.6);
-            border: 2px solid rgba(0, 140, 255, 0.25);
-            border-radius: 28px;
-            padding: 1rem 1rem 1rem 3.4rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: white;
+            padding: 1.2rem;
+            font-size: 1.8rem;
+            letter-spacing: 0.8rem;
+            text-align: center;
+            border: 2px solid var(--input-border);
+            border-radius: 20px;
             outline: none;
-            transition: all 0.25s;
-            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
 
         input:focus {
-            border-color: #2a9eff;
-            background: rgba(0, 30, 60, 0.8);
-            box-shadow: 0 0 0 5px rgba(0, 160, 255, 0.15), 0 10px 20px -10px #001d3d inset;
+            border-color: var(--input-focus);
         }
 
-        input::placeholder {
-            color: #608bb7;
-            font-weight: 400;
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
             font-size: 1rem;
-            opacity: 0.7;
         }
 
-        /* security note (OTP hint) */
-        .security-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 1.8rem 0 1.5rem;
-            font-size: 0.95rem;
-        }
-
-        .security-note {
-            color: #8bb9e7;
-            background: rgba(0, 100, 200, 0.2);
-            padding: 6px 18px;
-            border-radius: 30px;
-            border: 1px solid rgba(0, 200, 255, 0.15);
-        }
-
-        .security-note i {
-            color: #47b5ff;
-            margin-right: 8px;
-        }
-
-        .otp-indicator {
-            color: #a0c9ff;
+        .forgot-link {
+            display: block;
+            text-align: right;
+            color: var(--btn-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 8px;
             font-weight: 500;
         }
 
-        /* button — futuristic, glowing */
-        .btn-send {
-            background: linear-gradient(145deg, #004a99, #002b66);
-            border: none;
-            border-radius: 60px;
-            padding: 1.2rem 2rem;
+        .btn-signin {
+            display: block;
             width: 100%;
-            font-weight: 700;
-            font-size: 1.3rem;
+            padding: 1.2rem;
+            background: var(--btn-green);
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            box-shadow: 0 18px 30px -12px #001d4a, 0 0 0 1px #2a7fff inset;
-            transition: all 0.25s;
-            cursor: pointer;
-        }
-
-        .btn-send i {
-            font-size: 1.5rem;
-            transition: transform 0.3s;
-        }
-
-        .btn-send:hover {
-            background: linear-gradient(145deg, #005fc9, #003c88);
-            gap: 20px;
-            box-shadow: 0 24px 40px -12px #002f6a, 0 0 0 2px #5aadff inset;
-            transform: scale(1.02);
-        }
-
-        .btn-send:hover i {
-            transform: translateX(6px);
-        }
-
-        /* trust badges & footer */
-        .trust-badges {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 2.5rem;
-            color: #658bb3;
-            font-size: 0.85rem;
-        }
-
-        .trust-badges span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 6px 14px;
-            border-radius: 60px;
-            border: 1px solid rgba(0, 150, 255, 0.15);
-        }
-
-        .trust-badges i {
-            color: #3dacff;
-        }
-
-        .footer-note {
-            margin-top: 2rem;
-            text-align: center;
-            color: #4578a5;
-            font-size: 0.8rem;
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-        }
-
-        .footer-note a {
-            color: #78b9f0;
-            text-decoration: none;
-            border-bottom: 1px dotted #3f7fb0;
-        }
-
-        .footer-note a:hover {
-            color: white;
-            border-bottom-color: white;
-        }
-
-        /* Error message styling */
-        .error-message {
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 0, 0, 0.3);
-            color: #ff8a8a;
-            padding: 12px 20px;
-            border-radius: 30px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(5px);
-        }
-
-        .error-message i {
-            color: #ff6b6b;
+            border: none;
+            border-radius: 50px;
             font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 2rem;
+            box-shadow: 0 10px 20px rgba(0, 184, 148, 0.2);
+        }
+
+        .btn-signin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 184, 148, 0.3);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            color: var(--text-muted);
+        }
+
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--input-border);
+        }
+
+        .divider span {
+            padding: 0 10px;
+            font-size: 0.9rem;
+        }
+
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-google {
+            background: white;
+            border: 2px solid var(--input-border);
+            color: var(--text-main);
+        }
+
+        .btn-facebook {
+            background: #1877f2;
+            color: white;
+            border: none;
+        }
+
+        .btn-social:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .create-prompt {
+            margin-top: 2rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .btn-create {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 0.6rem 1.5rem;
+            border: 2px solid var(--btn-blue);
+            color: var(--btn-blue);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-create:hover {
+            background: var(--btn-blue);
+            color: white;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+
+        .tooltip-inline {
+            display: none;
+            margin-top: 10px;
+            color: var(--btn-blue);
+            font-size: 0.85rem;
+            text-align: right;
+            padding: 8px;
+            background: #f0f8ff;
+            border-radius: 8px;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            border: 1px solid #feb2b2;
         }
     </style>
 </head>
-
 <body>
-    <div class="bg-grid"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
-    <!-- main login card -->
     <div class="login-card">
-
-        <!-- header with dynamic icon and AI badge -->
-        <div class="header-icon">
-            <div class="neuro-logo">
-                <i class="bi bi-cpu"></i>
-            </div>
-            <div>
-                <h2>NeuroScan AI</h2>
-                <div class="badge-ai">
-                    <i class="bi bi-shield-check"></i> HIPAA compliant · v2.4
-                </div>
-            </div>
+        <div class="header-section">
+            <i class="bi bi-flower1 flower-icon"></i>
+            <h1 class="headline">Welcome to RememberMe.</h1>
         </div>
+        <p class="sub-headline">Your secure space for connection and care.</p>
 
-        <!-- friendly greeting -->
-        <div class="greeting">
-            <i class="bi bi-person-workspace"></i>
-            <span>Welcome back · Enter your email to receive a secure OTP</span>
-        </div>
-
-        <!-- 🔥 FIX 1: Error message display if any -->
         {% if error %}
         <div class="error-message">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>{{ error }}</span>
+            <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
         </div>
         {% endif %}
 
-        <!-- 🔥 FIX 2: Login form with proper CSRF and action -->
         <form method="post" action="/">
-            <!-- 🔥 FIX 3: CSRF token directly in form (not in hidden div) -->
             {% csrf_token %}
-
-            <!-- email input with floating icon (modern) -->
-            <div class="input-group">
-                <label class="input-label"><i class="bi bi-envelope-paper" style="margin-right: 8px;"></i>EMAIL
-                    ADDRESS</label>
-                <div class="input-field">
-                    <i class="bi bi-envelope-fill"></i>
-                    <!-- 🔥 FIX 4: Removed default value attribute -->
-                    <input type="email" name="email" placeholder="doctor@hospital.org" required>
+            
+            <div class="form-group">
+                <label class="form-label">Email or Username</label>
+                <div class="input-wrapper">
+                    <input type="email" name="email" placeholder="your.name@example.com" required>
                 </div>
             </div>
 
-            <!-- real-time OTP hint & security reassurance -->
-            <div class="security-row">
-                <span class="security-note"><i class="bi bi-shield-lock-fill"></i> 6-digit OTP</span>
-                <span class="otp-indicator"><i class="bi bi-clock-history"></i> expires in 10 min</span>
+            <div class="form-group">
+                <label class="form-label">Password.</label>
+                <div class="input-wrapper">
+                    <input type="password" id="passwordField" placeholder="••••••••" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="bi bi-eye" id="toggleIcon"></i> Show
+                    </button>
+                </div>
+                <a href="#" class="forgot-link" onclick="showTooltip(event)">Forgot password?</a>
+                <div id="forgotTooltip" class="tooltip-inline">
+                    No worries. A reset link will be sent to your registered email.
+                </div>
             </div>
 
-            <!-- main action button (Send OTP) with icon -->
-            <button type="submit" class="btn-send">
-                <span>Send One-Time Password</span>
-                <i class="bi bi-arrow-right-short"></i>
-            </button>
-
-            <!-- trust badges: 2FA / encryption / fda -->
-            <div class="trust-badges">
-                <span><i class="bi bi-phone"></i> 2FA ready</span>
-                <span><i class="bi bi-lock"></i> AES-256</span>
-                <span><i class="bi bi-hospital"></i> FDA cleared</span>
-            </div>
-
-            <!-- footer with links (real app style) -->
-            <div class="footer-note">
-                <a href="#" onclick="alert('Help center is coming soon!'); return false;"><i class="bi bi-question-circle"></i> help</a>
-                <a href="#" onclick="alert('Privacy policy is coming soon!'); return false;"><i class="bi bi-shield"></i> privacy</a>
-                <a href="#" onclick="alert('Enterprise contact is coming soon!'); return false;"><i class="bi bi-building"></i> enterprise</a>
-            </div>
+            <button type="submit" class="btn-signin">Sign In</button>
         </form>
 
-        <!-- subtle dynamic "live demo" hint (optional) -->
-        <div
-            style="text-align: center; margin-top: 1.8rem; font-size: 0.7rem; color: #34648b; border-top: 1px dashed #1d4870; padding-top: 1rem;">
-            <i class="bi bi-wifi"></i> real-time session · protected by quantum-ready encryption
+        <div class="create-prompt">
+            New to RememberMe? 
+            <a href="#" class="btn-create" onclick="alert('Account creation coming soon!'); return false;">Create an account</a>
+        </div>
+
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <div class="social-buttons">
+            <a href="#" class="btn-social btn-google" onclick="alert('Google login coming soon!'); return false;">
+                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="G"> Continue with Google
+            </a>
+            <a href="#" class="btn-social btn-facebook" onclick="alert('Facebook login coming soon!'); return false;">
+                <i class="bi bi-facebook"></i> Continue with Facebook
+            </a>
+        </div>
+
+        <div class="footer">
+            RememberMe – Supporting your journey. © 2024.
         </div>
     </div>
 
-    <!-- tiny script for placeholder interaction (purely cosmetic) -->
     <script>
-        (function () {
-            const input = document.querySelector('input[type="email"]');
-            if (input) {
-                input.addEventListener('focus', () => {
-                    document.querySelector('.badge-ai').style.borderColor = '#00b7ff';
-                });
-                input.addEventListener('blur', () => {
-                    document.querySelector('.badge-ai').style.borderColor = 'rgba(0, 200, 255, 0.4)';
-                });
+        function togglePassword() {
+            const field = document.getElementById('passwordField');
+            const icon = document.getElementById('toggleIcon');
+            const btn = field.nextElementSibling;
+            
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+                btn.innerHTML = '<i class="bi bi-eye-slash" id="toggleIcon"></i> Hide';
+            } else {
+                field.type = "password";
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+                btn.innerHTML = '<i class="bi bi-eye" id="toggleIcon"></i> Show';
             }
-        })();
+        }
+
+        function showTooltip(e) {
+            e.preventDefault();
+            const tooltip = document.getElementById('forgotTooltip');
+            tooltip.style.display = 'block';
+            setTimeout(() => {
+                tooltip.style.display = 'none';
+            }, 4000);
+        }
     </script>
 </body>
-
 </html>

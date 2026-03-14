@@ -7,15 +7,78 @@ import h5py
 import urllib.request
 import json
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.files.storage import FileSystemStorage
+from .models import PatientRecord
+
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import io
 
 from keras.models import load_model, Sequential
 from keras.layers import Dense, Flatten, Dropout, Input, GlobalAveragePooling2D
 from keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
+import tensorflow as tf
 
+# -----------------------------
+# GRAD-CAM UTILS
+# -----------------------------
+def get_jet_colormap():
+    x = np.linspace(0, 1, 256)
+    r = np.clip(1.5 - np.abs(4 * x - 3), 0, 1)
+    g = np.clip(1.5 - np.abs(4 * x - 2), 0, 1)
+    b = np.clip(1.5 - np.abs(4 * x - 1), 0, 1)
+    cmap = np.stack([r, g, b], axis=-1) * 255
+    return cmap.astype(np.uint8)
+
+def make_gradcam_heatmap(img_array, full_model, last_conv_layer_name="out_relu"):
+    base_model = full_model.layers[0] # MobileNetV2
+    try:
+        last_conv_layer = base_model.get_layer(last_conv_layer_name)
+    except ValueError:
+        return None
+
+    inner_model = tf.keras.Model(base_model.inputs, last_conv_layer.output)
+    
+    classifier_input = tf.keras.Input(shape=inner_model.output.shape[1:])
+    x = classifier_input
+    for layer in full_model.layers[1:]:
+        x = layer(x)
+    classifier_model = tf.keras.Model(classifier_input, x)
+
+    with tf.GradientTape() as tape:
+        last_conv_layer_output = inner_model(img_array)
+        tape.watch(last_conv_layer_output)
+        preds = classifier_model(last_conv_layer_output)
+        class_channel = preds[:, 0]
+        
+    grads = tape.gradient(class_channel, last_conv_layer_output)
+    pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+    
+    last_conv_layer_output = last_conv_layer_output[0]
+    heatmap = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
+    heatmap = tf.squeeze(heatmap)
+    heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
+    return heatmap.numpy()
+
+def save_gradcam(img_path, heatmap, cam_path, alpha=0.4):
+    img = tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224))
+    img = tf.keras.preprocessing.image.img_to_array(img)
+
+    heatmap = np.uint8(255 * heatmap)
+    jet_colors = get_jet_colormap()
+    jet_heatmap = jet_colors[heatmap]
+
+    jet_heatmap = tf.keras.preprocessing.image.array_to_img(jet_heatmap)
+    jet_heatmap = jet_heatmap.resize((img.shape[1], img.shape[0]))
+    jet_heatmap = tf.keras.preprocessing.image.img_to_array(jet_heatmap)
+
+    superimposed_img = jet_heatmap * alpha + img * (1 - alpha)
+    superimposed_img = tf.keras.preprocessing.image.array_to_img(superimposed_img)
+    superimposed_img.save(cam_path)
 
 # -----------------------------
 # MODEL CONFIG
@@ -266,10 +329,40 @@ def verify_view(request):
 
 
 # -----------------------------
-# UPLOAD PAGE
+# UPLOAD PAGE (DASHBOARD)
 # -----------------------------
 def upload_page(request):
-    return render(request, "upload.html")
+    email = request.session.get("email", "unknown@example.com")
+    
+    # In a real app we might filter by user_email, here we'll just show all for the demo
+    # records = PatientRecord.objects.filter(user_email=email)
+    records = PatientRecord.objects.all()
+    
+    total_patients = records.count()
+    alzheimer_cases = records.filter(prediction_result__icontains="Alzheimer").count()
+    normal_cases = records.filter(prediction_result__icontains="Healthy").count()
+    
+    recent_records = records.order_by('-date')[:5]
+    
+    return render(request, "upload.html", {
+        "total_patients": total_patients,
+        "alzheimer_cases": alzheimer_cases,
+        "normal_cases": normal_cases,
+        "recent_records": recent_records
+    })
+
+# -----------------------------
+# PERFORMANCE PAGE
+# -----------------------------
+def performance_page(request):
+    return render(request, "performance.html")
+
+# -----------------------------
+# ALZHEIMER INFO PAGE
+# -----------------------------
+def info_page(request):
+    return render(request, "info.html")
+
 
 
 # -----------------------------
@@ -320,16 +413,83 @@ def predict_mri(request):
             if score >= 0.5:
                 result = "Alzheimer Detected"
                 confidence = round(score * 100, 2)
+                risk_level = "High risk"
             else:
                 result = "Healthy Brain"
                 confidence = round((1 - score) * 100, 2)
+                risk_level = "Low risk"
 
             image_url = settings.MEDIA_URL + filename
+            
+            # Generate Grad-CAM Heatmap
+            heatmap_url = None
+            try:
+                heatmap = make_gradcam_heatmap(img_array, model, "out_relu")
+                if heatmap is not None:
+                    cam_filename = "cam_" + filename
+                    cam_path = fs.path(cam_filename)
+                    save_gradcam(file_path, heatmap, cam_path)
+                    heatmap_url = settings.MEDIA_URL + cam_filename
+            except Exception as e:
+                print(f"Error generating Grad-CAM: {e}", flush=True)
+
+            # Analyze Questionnaire
+            q_score = 0
+            q_score += int(request.POST.get("q_memory_loss", 0))
+            q_score += int(request.POST.get("q_names", 0))
+            q_score += int(request.POST.get("q_time_place", 0))
+            q_score += int(request.POST.get("q_conversation", 0))
+            
+            # Analyze Cognitive Score
+            cogn_score = request.POST.get("cognitive_score")
+            if cogn_score:
+                try:
+                    cogn_score = int(cogn_score)
+                except ValueError:
+                    cogn_score = None
+            else:
+                cogn_score = None
+
+            # Calculate overall risk
+            if score >= 0.5 or q_score >= 8 or (cogn_score is not None and cogn_score < 40):
+                risk_level = "High risk"
+            elif q_score >= 4 or (cogn_score is not None and cogn_score < 70):
+                risk_level = "Moderate risk"
+            else:
+                risk_level = "Low risk"
+            
+            # Save Patient Record
+            email = request.session.get("email", "unknown@example.com")
+            patient_name = request.POST.get("patient_name", "Unknown")
+            age = request.POST.get("age")
+            if age:
+                try:
+                    age = int(age)
+                except ValueError:
+                    age = None
+            
+            record = PatientRecord.objects.create(
+                user_email=email,
+                patient_name=patient_name,
+                age=age,
+                scan_image='scans/' + filename,
+                prediction_result=result,
+                confidence=confidence,
+                risk_level=risk_level,
+                cognitive_score=cogn_score
+            )
 
             return render(request, "upload.html", {
                 "result": result,
                 "confidence": confidence,
-                "image_url": image_url
+                "image_url": image_url,
+                "heatmap_url": heatmap_url,
+                "patient_name": patient_name,
+                "age": age,
+                "record_id": record.id,
+                "q_score": q_score,
+                "cogn_score": cogn_score,
+                "risk_level": risk_level
             })
             
         except Exception as e:
@@ -387,3 +547,48 @@ def resend_otp(request):
 def logout_view(request):
     request.session.flush()
     return redirect("login")
+
+# -----------------------------
+# DOWNLOAD PDF REPORT
+# -----------------------------
+def download_report(request, record_id):
+    record = get_object_or_404(PatientRecord, id=record_id)
+    
+    # Create a file-like buffer to receive PDF data.
+    buffer = io.BytesIO()
+    
+    # Create the PDF object, using the buffer as its "file."
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    
+    # Draw things on the PDF
+    p.setFont("Helvetica-Bold", 20)
+    p.drawString(200, height - 50, "Clinical Assessment Report")
+    
+    p.setFont("Helvetica", 12)
+    p.drawString(50, height - 100, f"Patient Name: {record.patient_name}")
+    p.drawString(50, height - 120, f"Age: {record.age if record.age else 'N/A'}")
+    p.drawString(50, height - 140, f"Date of Assessment: {record.date.strftime('%B %d, %Y')}")
+    
+    p.line(50, height - 160, width - 50, height - 160)
+    
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, height - 200, "AI Diagnosis Results")
+    p.setFont("Helvetica", 12)
+    p.drawString(50, height - 230, f"Prediction: {record.prediction_result}")
+    p.drawString(50, height - 250, f"Confidence: {record.confidence}%")
+    p.drawString(50, height - 270, f"Risk Level: {record.risk_level}")
+    
+    # If the user has a cognitive score
+    if record.cognitive_score is not None:
+        p.drawString(50, height - 290, f"Cognitive Test Score: {record.cognitive_score}/100")
+        
+    p.drawString(50, height - 340, "Disclaimer: This AI prediction is for informational purposes only")
+    p.drawString(50, height - 360, "and should not be used as a substitute for professional medical advice.")
+    
+    # Close the PDF object cleanly
+    p.showPage()
+    p.save()
+    
+    buffer.seek(0)
+    return HttpResponse(buffer, content_type='application/pdf')

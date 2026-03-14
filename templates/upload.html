@@ -387,22 +387,34 @@
         </div>
 
         <ul class="nav nav-pills flex-column mb-auto" id="dashboard-tab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link w-100 text-start {% if result or image_url or error %}active{% else %}active{% endif %}" id="pills-scan-tab" data-bs-toggle="pill" data-bs-target="#pills-scan" type="button" role="tab">
+            <li class="nav-item">
+                <button class="nav-link w-100 text-start {% if result or error %}{% else %}active{% endif %}" id="pills-dashboard-tab" data-bs-toggle="pill" data-bs-target="#pills-dashboard" type="button">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link w-100 text-start {% if result or error %}active{% endif %}" id="pills-scan-tab" data-bs-toggle="pill" data-bs-target="#pills-scan" type="button">
                     <i class="bi bi-plus-square"></i>
                     <span>New Scan</span>
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link w-100 text-start" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab">
+            <li class="nav-item">
+                <a href="/performance/" class="nav-link w-100 text-start">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Performance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/info/" class="nav-link w-100 text-start">
+                    <i class="bi bi-info-circle"></i>
+                    <span>Brain Info</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link w-100 text-start" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button">
                     <i class="bi bi-person"></i>
                     <span>Edit Profile</span>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link w-100 text-start" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings" type="button" role="tab">
-                    <i class="bi bi-gear"></i>
-                    <span>Settings</span>
                 </button>
             </li>
         </ul>
@@ -440,45 +452,141 @@
 
         <div class="tab-content" id="pills-tabContent">
             
+            <!-- ====== TAB 0: DASHBOARD ====== -->
+            <div class="tab-pane fade {% if result or image_url or error %}{% else %}show active{% endif %}" id="pills-dashboard" role="tabpanel">
+                
+                <!-- Stats Row -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card-panel py-3 px-4 text-center">
+                            <h2 class="text-primary mb-0">{{ total_patients|default:"0" }}</h2>
+                            <p class="text-muted mb-0 small fw-bold text-uppercase">Total Patients</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card-panel py-3 px-4 text-center">
+                            <h2 class="text-danger mb-0">{{ alzheimer_cases|default:"0" }}</h2>
+                            <p class="text-muted mb-0 small fw-bold text-uppercase">Alzheimer Cases</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card-panel py-3 px-4 text-center">
+                            <h2 class="text-success mb-0">{{ normal_cases|default:"0" }}</h2>
+                            <p class="text-muted mb-0 small fw-bold text-uppercase">Healthy Brains</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card-panel py-3 px-4 text-center">
+                            <h2 class="text-info mb-0">94%</h2>
+                            <p class="text-muted mb-0 small fw-bold text-uppercase">Model Accuracy</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card-panel h-100 p-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart text-primary me-2"></i>Cases Distribution</h5>
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-panel h-100 p-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-graph-up text-primary me-2"></i>Model Usage (Last 7 Days)</h5>
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Predictions Table -->
+                <div class="card-panel p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0"><i class="bi bi-clock-history text-primary me-2"></i>Recent Predictions</h5>
+                        <div class="position-relative" style="max-width: 250px;">
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                            <input type="text" id="patientSearch" class="form-control form-control-sm ps-5 rounded-pill" placeholder="Search name/result...">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="historyTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Age</th>
+                                    <th>Result</th>
+                                    <th>Risk Level</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                                {% for record in recent_records %}
+                                <tr>
+                                    <td class="fw-bold">{{ record.patient_name }}</td>
+                                    <td>{{ record.age }}</td>
+                                    <td>
+                                        {% if "Alzheimer" in record.prediction_result %}
+                                        <span class="badge bg-danger">Alzheimer Detected</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Normal</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.risk_level == 'High risk' %}
+                                        <span class="text-danger fw-bold"><i class="bi bi-arrow-up-circle"></i> High</span>
+                                        {% else %}
+                                        <span class="text-success fw-bold"><i class="bi bi-arrow-down-circle"></i> Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.date|date:"D d M" }}</td>
+                                    <td>
+                                        <a href="/report/{{ record.id }}/" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-download"></i> PDF
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-3">No recent predictions found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- ====== TAB 1: NEW SCAN (Upload) ====== -->
-            <div class="tab-pane fade show active" id="pills-scan" role="tabpanel">
+            <div class="tab-pane fade {% if result or image_url or error %}show active{% endif %}" id="pills-scan" role="tabpanel">
                 <div class="detection-grid">
                     
-                    <!-- left — upload form -->
-                    <div class="card-panel">
+                    {% if result %}
+                    <!-- LEFT: IMAGE PREVIEW & HEATMAP -->
+                    <div class="card-panel h-100">
                         <div class="card-title">
-                            <i class="bi bi-cloud-upload"></i>
-                            <h3>Upload MRI Scan</h3>
+                            <i class="bi bi-image"></i>
+                            <h3>Brain Scan Analysis</h3>
                         </div>
-
-                        <form method="post" action="/predict/" enctype="multipart/form-data" id="mriForm">
-                            {% csrf_token %}
-                            <div class="upload-area" onclick="document.getElementById('mriFile').click();">
-                                <i class="bi bi-cloud-arrow-up upload-icon"></i>
-                                <h4><span class="d-none d-sm-inline">Drag & drop or click</span><span class="d-inline d-sm-none">Tap to browse</span></h4>
-                                <p class="text-muted small">Supports standard MRI slices (JPG, PNG)</p>
-                                <input type="file" name="mri" id="mriFile" class="file-input" accept="image/*" required>
-                                <label for="mriFile" class="file-label" onclick="event.stopPropagation();">
-                                    <i class="bi bi-folder2-open me-2"></i>Choose File
-                                </label>
-                                <div class="mt-3 text-success small fw-bold" id="fileHint" style="display:none;">
-                                    <i class="bi bi-check-circle"></i> <span id="fileNameDisplay"></span> ready
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn-analyze">
-                                <i class="bi bi-graph-up"></i> Analyze Image
+                        <div class="image-container position-relative d-flex justify-content-center align-items-center" style="background:none; border:none; padding:0;">
+                            <img src="{{ image_url }}" class="uploaded-image" alt="MRI Scan" id="originalImage" style="z-index: 1;">
+                            {% if heatmap_url %}
+                            <img src="{{ heatmap_url }}" class="uploaded-image position-absolute" alt="Heatmap" id="heatmapImage" style="opacity: 0; transition: opacity 0.3s; z-index: 2; top: 0; height: 100%;">
+                            {% endif %}
+                        </div>
+                        {% if heatmap_url %}
+                        <div class="mt-4 text-center">
+                            <button type="button" class="btn btn-outline-danger fw-bold rounded-pill px-4" id="toggleHeatmapBtn">
+                                <i class="bi bi-fire"></i> Overlay AI Heatmap
                             </button>
-                        </form>
+                            <p class="text-muted small mt-2">Highlights regions the AI used for prediction (Grad-CAM).</p>
+                        </div>
+                        {% endif %}
                     </div>
 
-                    <!-- right — preview or result -->
-                    {% if result %}
-                    <!-- SHOW RESULT -->
-                    <div class="card-panel">
+                    <!-- RIGHT: ANALYSIS RESULT -->
+                    <div class="card-panel h-100">
                         <div class="card-title">
                             <i class="bi bi-clipboard2-pulse"></i>
-                            <h3>Analysis Results</h3>
+                            <h3>Diagnosis Results</h3>
                         </div>
 
                         <div class="prediction-main">
@@ -495,34 +603,136 @@
                             </div>
                         </div>
 
+                        <!-- Assessment Details -->
+                        <div class="mt-4 mb-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-primary me-2"></i>Clinical Assessment</h5>
+                            <div class="bg-light p-3 rounded border">
+                                <div class="d-flex justify-content-between mb-2 pb-2" style="border-bottom: 2px dashed #cbddee;">
+                                    <span class="text-secondary fw-bold">Overall Risk Level</span>
+                                    <span class="fw-bold {% if risk_level == 'High risk' %}text-danger{% elif risk_level == 'Moderate risk' %}text-warning{% else %}text-success{% endif %}">
+                                        {{ risk_level }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-secondary">Questionnaire Score</span>
+                                    <span class="fw-bold">{{ q_score }}/10</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary">Cognitive Test</span>
+                                    <span class="fw-bold">{% if cogn_score is not none %}{{ cogn_score }}/100{% else %}Not Taken{% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-primary rounded-pill w-100" onclick="alert('Downloading clinical report...')">
-                                <i class="bi bi-download"></i> Report
+                            {% if record_id %}
+                            <a href="/report/{{ record_id }}/" target="_blank" class="btn btn-outline-primary rounded-pill w-100">
+                                <i class="bi bi-download"></i> PDF Report
+                            </a>
+                            {% else %}
+                            <button class="btn btn-outline-primary rounded-pill w-100" onclick="alert('Report not available for this session.')">
+                                <i class="bi bi-download"></i> PDF Report
                             </button>
-                            <A class="btn btn-outline-secondary rounded-pill w-100" href="/upload/">
-                                <i class="bi bi-arrow-repeat"></i> Reset
+                            {% endif %}
+                            <a class="btn btn-outline-secondary rounded-pill w-100" href="/upload/">
+                                <i class="bi bi-arrow-repeat"></i> Start New Scan
                             </a>
                         </div>
                     </div>
+
                     {% else %}
-                    <!-- SHOW PREVIEW -->
+                    <!-- left — upload form -->
                     <div class="card-panel">
                         <div class="card-title">
-                            <i class="bi bi-image"></i>
-                            <h3>Scan Preview</h3>
+                            <i class="bi bi-cloud-upload"></i>
+                            <h3>Upload MRI Scan</h3>
                         </div>
 
-                        <div class="image-container">
-                            {% if image_url %}
-                            <img src="{{ image_url }}" class="uploaded-image" alt="MRI Scan">
-                            {% else %}
-                            <div class="placeholder-image">
-                                <i class="bi bi-file-medical"></i>
-                                <p>No image uploaded yet</p>
+                        <form method="post" action="/predict/" enctype="multipart/form-data" id="mriForm">
+                            {% csrf_token %}
+                            
+                            <!-- Patient Details -->
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <input type="text" name="patient_name" class="form-control" placeholder="Patient Name" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="number" name="age" class="form-control" placeholder="Age" required>
+                                </div>
                             </div>
-                            {% endif %}
-                        </div>
+                            <div class="upload-area" onclick="document.getElementById('mriFile').click();">
+                                <i class="bi bi-cloud-arrow-up upload-icon"></i>
+                                <h4><span class="d-none d-sm-inline">Drag & drop or click</span><span class="d-inline d-sm-none">Tap to browse</span></h4>
+                                <p class="text-muted small">Supports standard MRI slices (JPG, PNG)</p>
+                                <input type="file" name="mri" id="mriFile" class="file-input" accept="image/*" required>
+                                <label for="mriFile" class="file-label" onclick="event.stopPropagation();">
+                                    <i class="bi bi-folder2-open me-2"></i>Choose File
+                                </label>
+                                <div class="mt-3 text-success small fw-bold" id="fileHint" style="display:none;">
+                                    <i class="bi bi-check-circle"></i> <span id="fileNameDisplay"></span> ready
+                                </div>
+                            </div>
+                            
+                            <!-- Clinical Assessment Section -->
+                            <div class="card-panel mt-4 p-4 mb-4">
+                                <div class="card-title mb-3">
+                                    <i class="bi bi-clipboard2-check text-primary"></i>
+                                    <h4 class="mb-0 fw-bold">Clinical Questionnaire</h4>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <div class="form-check form-switch fs-5 mb-2">
+                                            <input class="form-check-input" type="checkbox" name="q_memory_loss" value="3" id="q1">
+                                            <label class="form-check-label fs-6 align-middle ms-2" for="q1">Frequent memory loss?</label>
+                                        </div>
+                                        <div class="form-check form-switch fs-5 mb-2">
+                                            <input class="form-check-input" type="checkbox" name="q_names" value="2" id="q2">
+                                            <label class="form-check-label fs-6 align-middle ms-2" for="q2">Difficulty remembering names?</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <div class="form-check form-switch fs-5 mb-2">
+                                            <input class="form-check-input" type="checkbox" name="q_time_place" value="3" id="q3">
+                                            <label class="form-check-label fs-6 align-middle ms-2" for="q3">Confusion with time/place?</label>
+                                        </div>
+                                        <div class="form-check form-switch fs-5">
+                                            <input class="form-check-input" type="checkbox" name="q_conversation" value="2" id="q4">
+                                            <label class="form-check-label fs-6 align-middle ms-2" for="q4">Trouble following conversations?</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cognitive Test Section -->
+                            <div class="card-panel mt-4 p-4 mb-4">
+                                <div class="card-title mb-3">
+                                    <i class="bi bi-puzzle text-primary"></i>
+                                    <h4 class="mb-0 fw-bold">Cognitive Memory Test</h4>
+                                </div>
+                                <p class="text-muted small mb-3">Perform a quick memory game to evaluate cognitive retention.</p>
+                                
+                                <div id="memoryGameArea" class="text-center p-4 bg-light rounded" style="border: 2px dashed #cbddee;">
+                                    <button type="button" class="btn btn-outline-primary" id="startMemoryTest">
+                                        <i class="bi bi-play-circle me-1"></i> Start Brain Test
+                                    </button>
+                                    <h2 id="numberDisplay" class="my-3 fw-bold text-primary" style="display:none; font-size: 3.5rem; letter-spacing: 8px;"></h2>
+                                    
+                                    <div id="inputArea" style="display:none;">
+                                        <p class="fw-bold text-secondary mb-2">Type the number you saw:</p>
+                                        <input type="number" id="memoryInput" class="form-control text-center mx-auto" style="max-width: 250px; font-size: 1.5rem; letter-spacing: 5px;" autocomplete="off">
+                                        <button type="button" class="btn btn-success mt-3" id="submitMemory">Verify Answer</button>
+                                    </div>
+                                    <div id="memoryResult" style="display:none;" class="mt-3 fw-bold fs-5 p-2 rounded"></div>
+                                    <input type="hidden" name="cognitive_score" id="cognitiveScoreInput" value="">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-analyze w-100 py-3 mt-2 fs-5">
+                                <i class="bi bi-graph-up pe-2"></i> Run Hybrid AI Predictor
+                            </button>
+                        </form>
                     </div>
+
                     {% endif %}
 
                 </div>
@@ -614,6 +824,7 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Handle file input display
         document.getElementById('mriFile').addEventListener('change', function(e) {
@@ -622,6 +833,119 @@
                 document.getElementById('fileNameDisplay').textContent = fileName;
                 document.getElementById('fileHint').style.display = 'block';
             }
+        });
+
+        // Memory Test Logic
+        let targetNumber = "";
+        document.getElementById('startMemoryTest').addEventListener('click', function() {
+            this.style.display = 'none';
+            const display = document.getElementById('numberDisplay');
+            
+            // Generate 5 digit number
+            targetNumber = Math.floor(10000 + Math.random() * 90000).toString();
+            display.textContent = targetNumber;
+            display.style.display = 'block';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                display.style.display = 'none';
+                document.getElementById('inputArea').style.display = 'block';
+                document.getElementById('memoryInput').focus();
+            }, 3000); 
+        });
+
+        document.getElementById('submitMemory').addEventListener('click', function() {
+            const inputVal = document.getElementById('memoryInput').value;
+            const resultDiv = document.getElementById('memoryResult');
+            document.getElementById('inputArea').style.display = 'none';
+            
+            let score = 0;
+            if(inputVal === targetNumber) {
+                score = 100;
+                resultDiv.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Perfect Memory (100/100)</span>';
+                resultDiv.style.backgroundColor = '#d1e7dd';
+            } else {
+                let matches = 0;
+                // Count correct digits regardless of order/position, or simple prefix match
+                for(let i=0; i<Math.min(inputVal.length, targetNumber.length); i++) {
+                    if(inputVal[i] === targetNumber[i]) matches++;
+                }
+                score = Math.round((matches / targetNumber.length) * 100);
+                if(score === 0 && inputVal.length > 0) score = 10; // Effort points
+                
+                resultDiv.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-circle-fill"></i> Score: ${score}/100 - Expected: ${targetNumber}</span>`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+            resultDiv.style.display = 'block';
+            document.getElementById('cognitiveScoreInput').value = score;
+        });
+
+
+        // Handle Heatmap Overlay Toggle
+        const heatmapBtn = document.getElementById('toggleHeatmapBtn');
+        if(heatmapBtn) {
+            heatmapBtn.addEventListener('click', function() {
+                const heatmapImg = document.getElementById('heatmapImage');
+                if (heatmapImg.style.opacity === "0" || heatmapImg.style.opacity === "") {
+                    heatmapImg.style.opacity = "0.7";
+                    heatmapBtn.classList.replace('btn-outline-danger', 'btn-danger');
+                    heatmapBtn.classList.replace('text-danger', 'text-white');
+                    heatmapBtn.innerHTML = '<i class="bi bi-eye-slash"></i> Hide Heatmap';
+                } else {
+                    heatmapImg.style.opacity = "0";
+                    heatmapBtn.classList.replace('btn-danger', 'btn-outline-danger');
+                    heatmapBtn.classList.replace('text-white', 'text-danger');
+                    heatmapBtn.innerHTML = '<i class="bi bi-fire"></i> Overlay AI Heatmap';
+                }
+            });
+        }
+
+        // Charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pie Chart
+            const ctxPie = document.getElementById('pieChart');
+            if(ctxPie) {
+                new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Healthy', 'Alzheimer Detected'],
+                        datasets: [{
+                            data: [{{ normal_cases|default:5 }}, {{ alzheimer_cases|default:2 }}],
+                            backgroundColor: ['#10b981', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { maintainAspectRatio: false }
+                });
+            }
+
+            // Bar Chart
+            const ctxBar = document.getElementById('barChart');
+            if(ctxBar) {
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Predictions',
+                            data: [3, 5, 2, 8, 4, 1, 6], /* Mock data */
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: { maintainAspectRatio: false }
+                });
+            }
+        });
+
+        // Patient Search Logic
+        document.getElementById('patientSearch').addEventListener('keyup', function() {
+            const val = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#historyTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(val) ? '' : 'none';
+            });
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

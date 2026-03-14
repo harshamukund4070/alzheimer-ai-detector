@@ -11,6 +11,12 @@ urlpatterns = [
 
     path("predict/", views.predict_mri, name="predict"),
     
+    path("report/<int:record_id>/", views.download_report, name="download_report"),
+    
+    path("performance/", views.performance_page, name="performance"),
+    
+    path("info/", views.info_page, name="info"),
+    
     path("resend-otp/", views.resend_otp, name="resend_otp"),
     
     path("logout/", views.logout_view, name="logout"),

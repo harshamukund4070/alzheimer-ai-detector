@@ -188,80 +188,76 @@ def send_email_async(subject, text_content, html_content, email):
 # BEAUTIFUL OTP EMAIL BUILDER (matches screenshot design)
 # ============================================================
 def build_otp_email(otp: str, context: str = "Login") -> str:
-    """Returns a richly-styled HTML email matching the Harsha Pvt Limited design."""
-    digits = "  ".join(list(otp))  # spaced digits like: 4  4  5  4  1  6
+    """Returns a richly-styled HTML email matching the Harsha Pvt Limited design with refined edges."""
     return f"""
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background-color:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f8;padding:30px 0;">
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7fa;padding:20px 0;">
   <tr><td align="center">
-  <table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;">
+  <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid #e1e8f0;">
 
     <!-- HEADER -->
-    <tr><td style="background:linear-gradient(135deg,#0a2540 0%,#0a4a7a 50%,#0d5fa0 100%);padding:44px 30px;text-align:center;border-radius:14px 14px 0 0;">
-      <div style="font-size:52px;margin-bottom:14px;">&#129504;</div>
-      <h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:800;letter-spacing:0.5px;">Harsha Pvt Limited</h1>
-      <p style="color:#a8d4f0;margin:8px 0 0;font-size:11px;letter-spacing:3px;font-weight:600;">AI ALZHEIMER MRI DETECTION PLATFORM</p>
+    <tr><td style="background:linear-gradient(135deg,#0a2540 0%,#0e3a5a 100%);padding:40px 30px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">&#129504;</div>
+      <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;">Harsha Pvt Limited</h1>
+      <p style="color:#8ab4d0;margin:6px 0 0;font-size:10px;letter-spacing:2px;font-weight:600;text-transform:uppercase;">AI Alzheimer MRI Detection Platform</p>
     </td></tr>
 
     <!-- BODY -->
-    <tr><td style="background:#ffffff;padding:44px 44px 36px;">
-      <p style="color:#8a9bb0;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0 0 10px;">Login Verification</p>
-      <h2 style="color:#0d1f33;font-size:28px;font-weight:800;margin:0 0 22px;">Your One-Time Password</h2>
+    <tr><td style="padding:40px 40px 30px;">
+      <p style="color:#5c728a;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 8px;">{context} Verification</p>
+      <h2 style="color:#1a2b3c;font-size:26px;font-weight:700;margin:0 0 20px;">Your One-Time Password</h2>
 
-      <p style="color:#1a2b3c;font-size:15px;margin:0 0 12px;">Hello, <strong>Valued User</strong> &#128075;</p>
-      <p style="color:#4a6070;font-size:14px;line-height:1.7;margin:0 0 30px;">
-        We received a <strong>{context}</strong> request for your account on the
-        <strong>AI Alzheimer MRI Detection Platform</strong>. Use the OTP below to complete your login.
+      <p style="color:#2d3e50;font-size:15px;margin:0 0 10px;">Hello, <strong>Valued User</strong> &#128075;</p>
+      <p style="color:#50667a;font-size:14px;line-height:1.6;margin:0 0 25px;">
+        Use the following secure code to complete your <strong>{context}</strong> request on our platform.
       </p>
 
       <!-- OTP BOX -->
-      <div style="background:#0d1b2a;border-radius:14px;padding:30px 20px;text-align:center;margin-bottom:22px;">
-        <p style="color:#6a8aa8;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin:0 0 18px;font-weight:600;">Your OTP Code</p>
-        <div style="font-size:44px;font-weight:800;letter-spacing:14px;color:#ffffff;font-family:'Courier New',Courier,monospace;margin-bottom:16px;">{digits}</div>
-        <p style="color:#e74c3c;font-size:13px;font-weight:700;margin:0;">&#9940; Valid for 5 minutes only</p>
+      <div style="background:#0d1b2a;border-radius:12px;padding:25px;text-align:center;margin-bottom:25px;border:1px solid #1a2b3c;">
+        <p style="color:#6a8aa8;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin:0 0 12px;font-weight:600;">Secure Verification Code</p>
+        <div style="font-size:48px;font-weight:800;color:#ffffff;font-family:'Courier New',Courier,monospace;display:inline-block;padding:5px 20px;letter-spacing:4px;border-bottom:2px solid #3f9eff;">{otp}</div>
+        <p style="color:#ff6b6b;font-size:12px;font-weight:600;margin-top:15px;margin-bottom:0;">&#9285; Valid for 5 minutes only</p>
       </div>
 
       <!-- BADGES -->
-      <table width="100%" cellpadding="4" cellspacing="0" style="margin-bottom:26px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:25px;">
         <tr>
-          <td width="33%" style="padding:4px;">
-            <div style="background:#0d2137;border-radius:10px;padding:14px 8px;text-align:center;">
-              <div style="font-size:22px;">&#128274;</div>
-              <div style="color:#a8c8e8;font-size:11px;margin-top:6px;font-weight:700;">Secure Login</div>
+          <td width="32%" style="padding:4px;">
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 5px;text-align:center;">
+              <div style="font-size:18px;">&#128274;</div>
+              <div style="color:#475569;font-size:10px;margin-top:4px;font-weight:700;">Secure</div>
             </div>
           </td>
-          <td width="33%" style="padding:4px;">
-            <div style="background:#1a160a;border-radius:10px;padding:14px 8px;text-align:center;">
-              <div style="font-size:22px;">&#9889;</div>
-              <div style="color:#f0c040;font-size:11px;margin-top:6px;font-weight:700;">One-Time Use</div>
+          <td width="32%" style="padding:4px;">
+            <div style="background:#fefce8;border:1px solid #fef08a;border-radius:10px;padding:12px 5px;text-align:center;">
+              <div style="font-size:18px;">&#9889;</div>
+              <div style="color:#854d0e;font-size:10px;margin-top:4px;font-weight:700;">Single Use</div>
             </div>
           </td>
-          <td width="33%" style="padding:4px;">
-            <div style="background:#0d2137;border-radius:10px;padding:14px 8px;text-align:center;">
-              <div style="font-size:22px;">&#127973;</div>
-              <div style="color:#a8c8e8;font-size:11px;margin-top:6px;font-weight:700;">Healthcare AI</div>
+          <td width="32%" style="padding:4px;">
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 5px;text-align:center;">
+              <div style="font-size:18px;">&#127973;</div>
+              <div style="color:#166534;font-size:10px;margin-top:4px;font-weight:700;">Health AI</div>
             </div>
           </td>
         </tr>
       </table>
 
       <!-- WARNING -->
-      <div style="background:#2d1e21;border-left:4px solid #e74c3c;border-radius:6px;padding:16px 18px;">
-        <p style="color:#e8d0c8;font-size:13px;margin:0;line-height:1.65;">
-          &#9888; <strong style="color:#f0a07a;">Did not request this?</strong>
-          If you did not attempt to log in, please ignore this email. Your account remains secure.
+      <div style="background:#fff5f5;border-left:4px solid #feb2b2;border-radius:4px;padding:15px;">
+        <p style="color:#c53030;font-size:12px;margin:0;line-height:1.5;">
+          <strong>Security Notice:</strong> If you did not request this code, please ignore this email. Your account remains protected.
         </p>
       </div>
     </td></tr>
 
     <!-- FOOTER -->
-    <tr><td style="background:#f8fafc;border-top:1px solid #dde6ee;padding:26px 44px;text-align:center;border-radius:0 0 14px 14px;">
-      <p style="color:#1a2b3c;font-size:14px;font-weight:800;margin:0 0 5px;">Harsha Pvt Limited</p>
-      <p style="color:#7a8fa0;font-size:12px;margin:0 0 18px;">AI Healthcare Technology &bull; MRI Analysis Platform</p>
-      <p style="color:#b0bec8;font-size:11px;margin:0 0 5px;">This is an automated message. Please do not reply to this email.</p>
-      <p style="color:#b0bec8;font-size:11px;margin:0;">&copy; 2025 Harsha Pvt Limited. All rights reserved.</p>
+    <tr><td style="background:#f8fafc;padding:25px 40px;text-align:center;border-top:1px solid #edf2f7;">
+      <p style="color:#2d3e50;font-size:13px;font-weight:700;margin:0 0 4px;">Harsha Pvt Limited</p>
+      <p style="color:#718096;font-size:11px;margin:0 0 15px;">AI Healthcare Technology &bull; MRI Analysis Platform</p>
+      <p style="color:#a0aec0;font-size:10px;margin:0;">&copy; 2025 Harsha Pvt Limited. All rights reserved.</p>
     </td></tr>
 
   </table>
@@ -309,7 +305,7 @@ def google_login(request):
     client_id = os.environ.get("GOOGLE_CLIENT_ID", "")
     if not client_id:
         return render(request, "login.html", {
-            "error": "Google login is not configured yet. Please use email/OTP login."
+            "error": "🛠️ Google Login setup required: Please add your GOOGLE_CLIENT_ID to the portal settings or .env file."
         })
     redirect_uri = request.build_absolute_uri("/google-callback/")
     params = {
@@ -318,7 +314,7 @@ def google_login(request):
         "response_type": "code",
         "scope": "openid email profile",
         "access_type": "offline",
-        "prompt": "select_account",   # forces account chooser every time
+        "prompt": "select_account",
     }
     return redirect(GOOGLE_AUTH_URL + "?" + urllib.parse.urlencode(params))
 

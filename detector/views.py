@@ -12,7 +12,8 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.files.storage import FileSystemStorage
-from .models import PatientRecord
+from .models import PatientRecord, AppUser
+import urllib.parse
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -183,61 +184,218 @@ def send_email_async(subject, text_content, html_content, email):
         print(f"Failed to send email via Brevo API: {e}", flush=True)
 
 
-# -----------------------------
-# AUTH VIEWS (SIGNUP, LOGIN, SOCIAL)
-# -----------------------------
+# ============================================================
+# BEAUTIFUL OTP EMAIL BUILDER (matches screenshot design)
+# ============================================================
+def build_otp_email(otp: str, context: str = "Login") -> str:
+    """Returns a richly-styled HTML email matching the Harsha Pvt Limited design."""
+    digits = "  ".join(list(otp))  # spaced digits like: 4  4  5  4  1  6
+    return f"""
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#f0f4f8;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f8;padding:30px 0;">
+  <tr><td align="center">
+  <table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;">
+
+    <!-- HEADER -->
+    <tr><td style="background:linear-gradient(135deg,#0a2540 0%,#0a4a7a 50%,#0d5fa0 100%);padding:44px 30px;text-align:center;border-radius:14px 14px 0 0;">
+      <div style="font-size:52px;margin-bottom:14px;">&#129504;</div>
+      <h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:800;letter-spacing:0.5px;">Harsha Pvt Limited</h1>
+      <p style="color:#a8d4f0;margin:8px 0 0;font-size:11px;letter-spacing:3px;font-weight:600;">AI ALZHEIMER MRI DETECTION PLATFORM</p>
+    </td></tr>
+
+    <!-- BODY -->
+    <tr><td style="background:#ffffff;padding:44px 44px 36px;">
+      <p style="color:#8a9bb0;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0 0 10px;">Login Verification</p>
+      <h2 style="color:#0d1f33;font-size:28px;font-weight:800;margin:0 0 22px;">Your One-Time Password</h2>
+
+      <p style="color:#1a2b3c;font-size:15px;margin:0 0 12px;">Hello, <strong>Valued User</strong> &#128075;</p>
+      <p style="color:#4a6070;font-size:14px;line-height:1.7;margin:0 0 30px;">
+        We received a <strong>{context}</strong> request for your account on the
+        <strong>AI Alzheimer MRI Detection Platform</strong>. Use the OTP below to complete your login.
+      </p>
+
+      <!-- OTP BOX -->
+      <div style="background:#0d1b2a;border-radius:14px;padding:30px 20px;text-align:center;margin-bottom:22px;">
+        <p style="color:#6a8aa8;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin:0 0 18px;font-weight:600;">Your OTP Code</p>
+        <div style="font-size:44px;font-weight:800;letter-spacing:14px;color:#ffffff;font-family:'Courier New',Courier,monospace;margin-bottom:16px;">{digits}</div>
+        <p style="color:#e74c3c;font-size:13px;font-weight:700;margin:0;">&#9940; Valid for 5 minutes only</p>
+      </div>
+
+      <!-- BADGES -->
+      <table width="100%" cellpadding="4" cellspacing="0" style="margin-bottom:26px;">
+        <tr>
+          <td width="33%" style="padding:4px;">
+            <div style="background:#0d2137;border-radius:10px;padding:14px 8px;text-align:center;">
+              <div style="font-size:22px;">&#128274;</div>
+              <div style="color:#a8c8e8;font-size:11px;margin-top:6px;font-weight:700;">Secure Login</div>
+            </div>
+          </td>
+          <td width="33%" style="padding:4px;">
+            <div style="background:#1a160a;border-radius:10px;padding:14px 8px;text-align:center;">
+              <div style="font-size:22px;">&#9889;</div>
+              <div style="color:#f0c040;font-size:11px;margin-top:6px;font-weight:700;">One-Time Use</div>
+            </div>
+          </td>
+          <td width="33%" style="padding:4px;">
+            <div style="background:#0d2137;border-radius:10px;padding:14px 8px;text-align:center;">
+              <div style="font-size:22px;">&#127973;</div>
+              <div style="color:#a8c8e8;font-size:11px;margin-top:6px;font-weight:700;">Healthcare AI</div>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- WARNING -->
+      <div style="background:#2d1e21;border-left:4px solid #e74c3c;border-radius:6px;padding:16px 18px;">
+        <p style="color:#e8d0c8;font-size:13px;margin:0;line-height:1.65;">
+          &#9888; <strong style="color:#f0a07a;">Did not request this?</strong>
+          If you did not attempt to log in, please ignore this email. Your account remains secure.
+        </p>
+      </div>
+    </td></tr>
+
+    <!-- FOOTER -->
+    <tr><td style="background:#f8fafc;border-top:1px solid #dde6ee;padding:26px 44px;text-align:center;border-radius:0 0 14px 14px;">
+      <p style="color:#1a2b3c;font-size:14px;font-weight:800;margin:0 0 5px;">Harsha Pvt Limited</p>
+      <p style="color:#7a8fa0;font-size:12px;margin:0 0 18px;">AI Healthcare Technology &bull; MRI Analysis Platform</p>
+      <p style="color:#b0bec8;font-size:11px;margin:0 0 5px;">This is an automated message. Please do not reply to this email.</p>
+      <p style="color:#b0bec8;font-size:11px;margin:0;">&copy; 2025 Harsha Pvt Limited. All rights reserved.</p>
+    </td></tr>
+
+  </table>
+  </td></tr>
+</table>
+</body></html>
+"""
+
+
+# ============================================================
+# GOOGLE OAUTH CONSTANTS
+# ============================================================
+GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
+
+
+# ============================================================
+# AUTH VIEWS
+# ============================================================
+
 def signup_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
+        email = request.POST.get("email", "").strip()
+        name = request.POST.get("name", "").strip()
+        if not email:
+            return render(request, "signup.html", {"error": "Email is required."})
+
         otp = str(random.randint(100000, 999999))
         print(f"Signup OTP for {email}: {otp}")
         request.session["otp"] = otp
         request.session["email"] = email
+        request.session["user_name"] = name
         request.session["is_signup"] = True
-        
-        subject = "NeuroScan AI - Verify Your Account"
-        html = f"<h3>Welcome to NeuroScan</h3><p>Your verification code is: <b>{otp}</b></p>"
+
+        subject = "NeuroScan AI – Verify Your Account"
+        html = build_otp_email(otp, context="Account Registration")
         threading.Thread(target=send_email_async, args=(subject, otp, html, email)).start()
-        
         return redirect("verify")
     return render(request, "signup.html")
 
-def social_login(request, provider):
-    """
-    For social login we cannot do a real OAuth callback without client IDs.
-    Instead we show an intermediate page that collects the user's email,
-    sends an OTP, and requires verification before granting access.
-    This ensures the same OTP security layer applies to all login methods.
-    """
-    if request.method == "POST":
-        email = request.POST.get("email", "").strip()
+
+def google_login(request):
+    """Step 1 – Redirect user to Google's OAuth consent/account chooser."""
+    client_id = os.environ.get("GOOGLE_CLIENT_ID", "")
+    if not client_id:
+        return render(request, "login.html", {
+            "error": "Google login is not configured yet. Please use email/OTP login."
+        })
+    redirect_uri = request.build_absolute_uri("/google-callback/")
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "select_account",   # forces account chooser every time
+    }
+    return redirect(GOOGLE_AUTH_URL + "?" + urllib.parse.urlencode(params))
+
+
+def google_callback(request):
+    """Step 2 – Google redirects back here with ?code=... Exchange for user email, send OTP."""
+    error_param = request.GET.get("error")
+    code = request.GET.get("code")
+
+    if error_param or not code:
+        return render(request, "login.html", {
+            "error": f"Google login was cancelled or failed: {error_param or 'no code received'}. Please try again."
+        })
+
+    client_id = os.environ.get("GOOGLE_CLIENT_ID", "")
+    client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+    redirect_uri = request.build_absolute_uri("/google-callback/")
+
+    try:
+        # Exchange auth code for tokens
+        token_data = urllib.parse.urlencode({
+            "code": code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": redirect_uri,
+            "grant_type": "authorization_code",
+        }).encode("utf-8")
+
+        token_req = urllib.request.Request(
+            GOOGLE_TOKEN_URL,
+            data=token_data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            method="POST"
+        )
+        with urllib.request.urlopen(token_req) as resp:
+            token_info = json.loads(resp.read())
+
+        access_token = token_info.get("access_token")
+        if not access_token:
+            raise Exception("No access token received from Google")
+
+        # Fetch user profile
+        info_req = urllib.request.Request(
+            GOOGLE_USERINFO_URL,
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        with urllib.request.urlopen(info_req) as resp:
+            user_info = json.loads(resp.read())
+
+        email = user_info.get("email", "").strip()
+        name = user_info.get("name", "Valued User")
+        google_id = user_info.get("id", "")
+
         if not email:
-            return render(request, "social_login.html", {
-                "provider": provider,
-                "error": "Please enter your email address."
-            })
+            raise Exception("Google did not return an email address")
+
+        # Generate OTP, store in session
         otp = str(random.randint(100000, 999999))
-        print(f"Social Login OTP ({provider}) for {email}: {otp}")
+        print(f"Google OAuth OTP for {email}: {otp}")
         request.session["otp"] = otp
         request.session["email"] = email
-        request.session["is_social"] = True
+        request.session["user_name"] = name
+        request.session["google_id"] = google_id
+        request.session["is_google"] = True
 
-        subject = f"NeuroScan AI – {provider.capitalize()} Login Verification"
-        text = f"Your OTP is: {otp}. Valid for 10 minutes."
-        html = f"""<html><body style="font-family:Inter,sans-serif;background:#030614;padding:30px;">
-        <div style="max-width:480px;margin:auto;background:rgba(10,22,40,0.9);border:1px solid #3f9eff;border-radius:20px;padding:30px;color:white;">
-            <h2>🔐 {provider.capitalize()} Login OTP</h2>
-            <p style="color:#9bb9da;">Verify your identity to complete login via {provider.capitalize()}.</p>
-            <div style="background:#001d4a;border-radius:12px;padding:20px;text-align:center;margin:20px 0;">
-                <span style="font-size:2.5rem;font-weight:700;letter-spacing:8px;color:#4db8ff;">{otp}</span>
-            </div>
-            <p style="color:#608bb7;font-size:0.9rem;">Valid for <strong>10 minutes</strong>. Do not share this OTP.</p>
-        </div></body></html>"""
-        threading.Thread(target=send_email_async, args=(subject, text, html, email)).start()
+        # Send the beautiful OTP email
+        subject = "NeuroScan AI – Google Login Verification"
+        html = build_otp_email(otp, context="Google Login")
+        threading.Thread(target=send_email_async, args=(subject, otp, html, email)).start()
         return redirect("verify")
 
-    # GET: show email collection page for this social provider
-    return render(request, "social_login.html", {"provider": provider})
+    except Exception as exc:
+        print(f"Google OAuth error: {exc}")
+        return render(request, "login.html", {
+            "error": f"Google authentication failed. Please try again or use email login."
+        })
+
 
 def forgot_password_view(request):
     if request.method == "POST":
@@ -251,45 +409,38 @@ def forgot_password_view(request):
         request.session["email"] = email
         request.session["is_reset"] = True
 
-        subject = "NeuroScan AI - Password Reset OTP"
-        text = f"Your password reset OTP is: {otp}. Valid for 10 minutes."
-        html = f"""
-        <html><body style="font-family:Inter,sans-serif;background:#030614;padding:30px;">
-        <div style="max-width:480px;margin:auto;background:rgba(10,22,40,0.9);border:1px solid #3f9eff;border-radius:20px;padding:30px;color:white;">
-            <h2>🔐 Password Reset</h2>
-            <p style="color:#9bb9da;">Use the OTP below to reset your NeuroScan AI password.</p>
-            <div style="background:#001d4a;border-radius:12px;padding:20px;text-align:center;margin:20px 0;">
-                <span style="font-size:2.5rem;font-weight:700;letter-spacing:8px;color:#4db8ff;">{otp}</span>
-            </div>
-            <p style="color:#608bb7;font-size:0.9rem;">This OTP expires in <strong>10 minutes</strong>. Do not share it with anyone.</p>
-        </div>
-        </body></html>
-        """
-        threading.Thread(target=send_email_async, args=(subject, text, html, email)).start()
+        subject = "NeuroScan AI – Password Reset"
+        html = build_otp_email(otp, context="Password Reset")
+        threading.Thread(target=send_email_async, args=(subject, otp, html, email)).start()
         return redirect("verify")
 
     return render(request, "forgot_password.html")
 
+
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        
-        # Simple login
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+
+        if not email:
+            return render(request, "login.html", {"error": "Please enter your email."})
+
+        # Credentials login (password >= 6 chars)
         if password and len(password) >= 6:
+            # Create/update user record
+            AppUser.objects.get_or_create(email=email, defaults={"name": email.split("@")[0]})
             request.session["email"] = email
             return redirect("upload")
 
-        # OTP
+        # Fallback: OTP login
         otp = str(random.randint(100000, 999999))
-        print(f"OTP for {email}: {otp}")
+        print(f"Login OTP for {email}: {otp}")
         request.session["otp"] = otp
         request.session["email"] = email
 
-        subject = "NeuroScan AI Login"
-        text = f"OTP: {otp}"
-        html = f"<b>{otp}</b>"
-        threading.Thread(target=send_email_async, args=(subject, text, html, email)).start()
+        subject = "NeuroScan AI – Your Login OTP"
+        html = build_otp_email(otp, context="Login")
+        threading.Thread(target=send_email_async, args=(subject, otp, html, email)).start()
         return redirect("verify")
 
     return render(request, "login.html")
@@ -300,26 +451,52 @@ def login_view(request):
 # -----------------------------
 def verify_view(request):
     email = request.session.get("email")
+    if not email:
+        return redirect("login")
 
     if request.method == "POST":
         user_otp = request.POST.get("otp", "").strip()
         real_otp = request.session.get("otp", "")
 
-        if user_otp == real_otp:
-            is_reset = request.session.pop("is_reset", False)
-            request.session.pop("is_signup", False)
-
-            if is_reset:
-                # After password reset OTP, go back to login with a success message
-                return render(request, "login.html", {
-                    "error": "✅ OTP verified! Your identity is confirmed. You may now log in."
-                })
-            return redirect("upload")
-        else:
+        if user_otp != real_otp:
             return render(request, "verify.html", {
-                "error": "Invalid OTP. Please try again.",
+                "error": "❌ Invalid OTP. Please check your email and try again.",
                 "email": email
             })
+
+        # OTP is correct — determine the flow type
+        is_reset  = request.session.pop("is_reset",  False)
+        is_signup = request.session.pop("is_signup", False)
+        is_google = request.session.pop("is_google", False)
+        request.session.pop("is_social", False)
+
+        # Persist / retrieve user in DB
+        name  = request.session.get("user_name", email.split("@")[0])
+        g_id  = request.session.get("google_id", None)
+
+        if is_google and g_id:
+            # For Google users, also save google_id
+            user, created = AppUser.objects.get_or_create(
+                email=email,
+                defaults={"name": name, "google_id": g_id}
+            )
+            if not created and not user.google_id:
+                user.google_id = g_id
+                user.save(update_fields=["google_id"])
+        elif not is_reset:
+            # Regular signup / login / social
+            AppUser.objects.get_or_create(email=email, defaults={"name": name})
+
+        # Clear OTP from session (one-time use)
+        request.session.pop("otp", None)
+
+        if is_reset:
+            return render(request, "login.html", {
+                "error": "✅ Identity verified! You may now log in with your credentials."
+            })
+
+        # All other flows → dashboard
+        return redirect("upload")
 
     return render(request, "verify.html", {"email": email})
 
@@ -524,37 +701,19 @@ def resend_otp(request):
     email = request.session.get("email")
     if email:
         otp = str(random.randint(100000, 999999))
-        
-        print(f"\n{'='*50}", flush=True)
-        print(f"🚨 RESENT OTP 🚨", flush=True)
-        print(f"New OTP for {email} is: {otp}", flush=True)
-        print(f"{'='*50}\n", flush=True)
+        print(f"Resent OTP for {email}: {otp}")
 
         request.session["otp"] = otp
 
         subject = "Harsha Pvt Limited – Your Resent Login OTP"
         text_content = f"Your new OTP is {otp}. Valid for 5 minutes."
-        
-        # Simple HTML for the resend
-        html_content = f"""
-        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4;">
-            <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block;">
-                <h2 style="color: #333;">Login Verification</h2>
-                <p style="color: #666; font-size: 16px;">Your new One-Time Password is:</p>
-                <div style="background-color: #007bff; color: white; padding: 15px 30px; border-radius: 5px; font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
-                    {otp}
-                </div>
-                <p style="color: #999; font-size: 12px;">Valid for 5 minutes. Do not share this code.</p>
-            </div>
-        </div>
-        """
+        html_content = build_otp_email(otp, context="OTP Resend")
 
         # Start thread to send email
-        email_thread = threading.Thread(
+        threading.Thread(
             target=send_email_async,
             args=(subject, text_content, html_content, email)
-        )
-        email_thread.start()
+        ).start()
 
     return redirect("verify")
 

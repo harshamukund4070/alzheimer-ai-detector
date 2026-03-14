@@ -11,3 +11,5 @@ resend
 reportlab
 opencv-python-headless
 matplotlib
+google-auth-oauthlib
+google-auth

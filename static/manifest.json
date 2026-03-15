@@ -1,0 +1,43 @@
+{
+  "name": "NeuroScan AI",
+  "short_name": "NeuroScan",
+  "description": "AI-Powered Alzheimer's Detection Platform providing automated MRI analysis and clinical diagnostic support.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030614",
+  "theme_color": "#004a99",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "NeuroScan AI Dashboard"
+    }
+  ],
+  "categories": ["medical", "health", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Scan",
+      "short_name": "Scan",
+      "description": "Upload a new MRI scan",
+      "url": "/upload/",
+      "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

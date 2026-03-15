@@ -198,7 +198,7 @@ def build_otp_email(otp: str, context: str = "Login") -> str:
   <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid #e1e8f0;">
 
     <!-- HEADER -->
-    <tr><td style="background:linear-gradient(135deg,#0a2540 0%,#0e3a5a 100%);padding:40px 30px;text-align:center;">
+    <tr><td style="background:linear-gradient(135deg,#0a2540 0%,#0e3a5a 100%);border-top-left-radius:16px;border-top-right-radius:16px;padding:40px 30px;text-align:center;">
       <div style="font-size:48px;margin-bottom:12px;">&#129504;</div>
       <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;">Harsha Pvt Limited</h1>
       <p style="color:#8ab4d0;margin:6px 0 0;font-size:10px;letter-spacing:2px;font-weight:600;text-transform:uppercase;">AI Alzheimer MRI Detection Platform</p>
@@ -533,6 +533,11 @@ def performance_page(request):
 def info_page(request):
     return render(request, "info.html")
 
+# -----------------------------
+# HELP CENTRE PAGE
+# -----------------------------
+def helpcentre_page(request):
+    return render(request, "helpcentre.html")
 
 
 # -----------------------------

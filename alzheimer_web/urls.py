@@ -11,6 +11,8 @@ urlpatterns = [
     # PWA files served directly
     path("manifest.json", serve, {"document_root": STATIC_ROOT_DIR, "path": "manifest.json"}),
     path("sw.js", serve, {"document_root": STATIC_ROOT_DIR, "path": "sw.js"}),
+    path("icon-192.png", serve, {"document_root": STATIC_ROOT_DIR, "path": "icon-192.png"}),
+    path("icon-512.png", serve, {"document_root": STATIC_ROOT_DIR, "path": "icon-512.png"}),
 ]
 
 # Serve uploaded media files (MRI images)

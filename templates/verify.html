@@ -465,6 +465,8 @@
         <div class="footer-links">
             <a href="/"><i class="bi bi-arrow-left"></i> back to login</a>
             <a href="#" onclick="alert('Support portal is coming soon!'); return false;"><i class="bi bi-question-circle"></i> need help?</a>
+            <a href="#" onclick="alert('Privacy policy is coming soon!'); return false;"><i class="bi bi-shield"></i> privacy</a>
+            <a href="#" onclick="alert('Enterprise contact is coming soon!'); return false;"><i class="bi bi-building"></i> enterprise</a>
         </div>
 
         <!-- subtle secure note (cosmetic) -->
@@ -472,6 +474,11 @@
             style="text-align: center; margin-top: 1.5rem; font-size: 0.7rem; color: #346fa0; border-top: 1px dashed #1f5080; padding-top: 1rem;">
             <i class="bi bi-wifi"></i> end-to-end encrypted · HIPAA compliant session
         </div>
+
+        <!-- Install as App button (shown only when PWA installable) -->
+        <button id="pwa-install-btn" style="display:none; margin-top:1.2rem; width:100%; background:rgba(0,200,100,0.1); border:1px solid rgba(0,200,100,0.3); color:#4dd6a0; border-radius:60px; padding:0.75rem 1rem; font-size:0.9rem; font-weight:600; cursor:pointer; align-items:center; justify-content:center; gap:10px; font-family:Inter,sans-serif; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,200,100,0.18)'" onmouseout="this.style.background='rgba(0,200,100,0.1)'">
+            <i class="bi bi-download"></i> Install App on This Device
+        </button>
     </div>
 
     <!-- simple timer script (cosmetic only — does NOT affect backend) -->
@@ -483,13 +490,13 @@
 
             function updateTimer() {
                 if (timeLeft <= 0) {
-                    timerElement.innerHTML = "00:00";
+                    if(timerElement) timerElement.innerHTML = "00:00";
                     return;
                 }
                 timeLeft--;
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                timerElement.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                if(timerElement) timerElement.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
 
             // update every second (just for show)
@@ -499,13 +506,42 @@
             const otpInput = document.querySelector('input[name="otp"]');
             if (otpInput) {
                 otpInput.addEventListener('focus', () => {
-                    document.querySelector('.badge-secure').style.borderColor = '#00ccff';
+                    const badge = document.querySelector('.badge-secure');
+                    if(badge) badge.style.borderColor = '#00ccff';
                 });
                 otpInput.addEventListener('blur', () => {
-                    document.querySelector('.badge-secure').style.borderColor = 'rgba(0, 180, 255, 0.4)';
+                    const badge = document.querySelector('.badge-secure');
+                    if(badge) badge.style.borderColor = 'rgba(0, 180, 255, 0.4)';
                 });
             }
         })();
+
+        // ── PWA Install Prompt ──
+        let deferredPrompt;
+        const installBtn = document.getElementById('pwa-install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installBtn) installBtn.style.display = 'flex';
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            });
+        }
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(console.warn);
+        }
     </script>
 </body>
 

@@ -14,6 +14,7 @@ urlpatterns = [
     path("icon-192.png", serve, {"document_root": STATIC_SRC_DIR, "path": "icon-192.png"}),
     path("icon-512.png", serve, {"document_root": STATIC_SRC_DIR, "path": "icon-512.png"}),
     path("screenshot1.png", serve, {"document_root": STATIC_SRC_DIR, "path": "screenshot1.png"}),
+    path("icons/<path:path>", serve, {"document_root": os.path.join(STATIC_SRC_DIR, "icons")}),
 ]
 
 # Serve uploaded media files (MRI images)

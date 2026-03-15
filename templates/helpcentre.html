@@ -27,6 +27,7 @@
     </style>
 </head>
 <body>
+    {% if request.session.email %}
     <nav class="sidebar">
         <div class="sidebar-brand">
             <div class="logo-icon"><i class="bi bi-cpu"></i></div>
@@ -42,6 +43,12 @@
         </div>
     </nav>
     <main class="main-content">
+    {% else %}
+    <main class="main-content" style="margin-left: 0; max-width: 1200px; margin: 0 auto; padding-top: 3rem;">
+        <a href="/" class="btn btn-outline-primary mb-5" style="border-radius: 30px; font-weight: 600; padding: 0.6rem 1.5rem;">
+            <i class="bi bi-arrow-left me-2"></i> Back to Login
+        </a>
+    {% endif %}
         <h1 class="fw-bold mb-2">Help Centre & Support</h1>
         <p class="text-muted mb-5">How can we help you today? Find answers to common questions or contact support directly.</p>
 

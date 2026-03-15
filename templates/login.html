@@ -401,10 +401,56 @@
             color: #ff6b6b;
             font-size: 1.2rem;
         }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #030614;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+        }
+        #splash-screen .neuro-logo {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 2rem;
+            animation: pulse-splash 1.5s infinite alternate;
+        }
+        #splash-screen .neuro-logo i {
+            font-size: 4rem;
+        }
+        #splash-screen h1 {
+            color: white;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #ffffff, #b0e0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        @keyframes pulse-splash {
+            0% { transform: scale(0.95); box-shadow: 0 0 20px rgba(0, 150, 255, 0.4); }
+            100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 150, 255, 0.8); }
+        }
     </style>
 </head>
 
 <body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="neuro-logo">
+            <i class="bi bi-cpu"></i>
+        </div>
+        <h1>NeuroScan AI</h1>
+    </div>
+
     <div class="bg-grid"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -507,9 +553,9 @@
 
             <!-- footer with links (real app style) -->
             <div class="footer-note">
-                <a href="#" onclick="alert('Help center is coming soon!'); return false;"><i class="bi bi-question-circle"></i> help</a>
-                <a href="#" onclick="alert('Privacy policy is coming soon!'); return false;"><i class="bi bi-shield"></i> privacy</a>
-                <a href="#" onclick="alert('Enterprise contact is coming soon!'); return false;"><i class="bi bi-building"></i> enterprise</a>
+                <a href="/helpcentre/"><i class="bi bi-question-circle"></i> help</a>
+                <a href="/info/"><i class="bi bi-shield"></i> privacy</a>
+                <a href="mailto:support@neuroscan.ai"><i class="bi bi-building"></i> enterprise</a>
             </div>
         </form>
 
@@ -519,13 +565,24 @@
             <i class="bi bi-wifi"></i> real-time session · protected by quantum-ready encryption
         </div>
 
-        <!-- Install as App button (shown only when PWA installable) -->
-        <button id="pwa-install-btn" style="display:none; margin-top:1.2rem; width:100%; background:rgba(0,200,100,0.1); border:1px solid rgba(0,200,100,0.3); color:#4dd6a0; border-radius:60px; padding:0.75rem 1rem; font-size:0.9rem; font-weight:600; cursor:pointer; align-items:center; justify-content:center; gap:10px; font-family:Inter,sans-serif; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,200,100,0.18)'" onmouseout="this.style.background='rgba(0,200,100,0.1)'">
-            <i class="bi bi-download"></i> Install App on This Device
+        <!-- Install as App button -->
+        <button id="pwa-install-btn" style="margin-top:1.2rem; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:rgba(0,200,100,0.1); border:1px solid rgba(0,200,100,0.3); color:#4dd6a0; border-radius:60px; padding:0.75rem 1rem; font-size:0.9rem; font-weight:600; cursor:pointer; font-family:Inter,sans-serif; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,200,100,0.18)'" onmouseout="this.style.background='rgba(0,200,100,0.1)'">
+            <i class="bi bi-download"></i> Download App
         </button>
 
     <!-- tiny script for placeholder interaction (purely cosmetic) -->
     <script>
+        // Splash Screen Logic
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    splash.style.visibility = 'hidden';
+                }
+            }, 2000);
+        });
+
         (function () {
             const input = document.querySelector('input[type="email"]');
             if (input) {
@@ -545,18 +602,18 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (installBtn) installBtn.style.display = 'flex';
         });
 
         if (installBtn) {
-            installBtn.addEventListener('click', async () => {
-                if (!deferredPrompt) return;
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBtn.style.display = 'none';
+            installBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                } else {
+                    alert('To install the app, use your browser options:\n\nAndroid/Chrome: "Install App" or "Add to Home Screen"\niOS/Safari: "Share" > "Add to Home Screen"\nDesktop: Click the install icon in the URL bar (if supported).');
                 }
-                deferredPrompt = null;
             });
         }
 

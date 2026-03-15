@@ -195,11 +195,11 @@ def build_otp_email(otp: str, context: str = "Login") -> str:
 <body style="margin:0;padding:0;background-color:#f4f7fa;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7fa;padding:20px 0;">
   <tr><td align="center">
-  <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid #e1e8f0;">
+  <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 15px 30px rgba(0,0,0,0.08);border:1px solid #e1e8f0;">
 
     <!-- HEADER -->
-    <tr><td style="background:linear-gradient(135deg,#0a2540 0%,#0e3a5a 100%);border-top-left-radius:16px;border-top-right-radius:16px;padding:40px 30px;text-align:center;">
-      <div style="font-size:48px;margin-bottom:12px;">&#129504;</div>
+    <tr><td style="background:linear-gradient(135deg,#0a2540 0%,#0e3a5a 100%);padding:40px 30px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">🧠</div>
       <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;">Harsha Pvt Limited</h1>
       <p style="color:#8ab4d0;margin:6px 0 0;font-size:10px;letter-spacing:2px;font-weight:600;text-transform:uppercase;">AI Alzheimer MRI Detection Platform</p>
     </td></tr>
@@ -209,36 +209,36 @@ def build_otp_email(otp: str, context: str = "Login") -> str:
       <p style="color:#5c728a;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 8px;">{context} Verification</p>
       <h2 style="color:#1a2b3c;font-size:26px;font-weight:700;margin:0 0 20px;">Your One-Time Password</h2>
 
-      <p style="color:#2d3e50;font-size:15px;margin:0 0 10px;">Hello, <strong>Valued User</strong> &#128075;</p>
+      <p style="color:#2d3e50;font-size:15px;margin:0 0 10px;">Hello, <strong>Valued User</strong> 👋</p>
       <p style="color:#50667a;font-size:14px;line-height:1.6;margin:0 0 25px;">
         Use the following secure code to complete your <strong>{context}</strong> request on our platform.
       </p>
 
       <!-- OTP BOX -->
-      <div style="background:#0d1b2a;border-radius:12px;padding:25px;text-align:center;margin-bottom:25px;border:1px solid #1a2b3c;">
+      <div style="background:#0d1b2a;border-radius:14px;padding:25px;text-align:center;margin-bottom:25px;border:1px solid #1a2b3c;">
         <p style="color:#6a8aa8;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin:0 0 12px;font-weight:600;">Secure Verification Code</p>
         <div style="font-size:48px;font-weight:800;color:#ffffff;font-family:'Courier New',Courier,monospace;display:inline-block;padding:5px 20px;letter-spacing:4px;border-bottom:2px solid #3f9eff;">{otp}</div>
-        <p style="color:#ff6b6b;font-size:12px;font-weight:600;margin-top:15px;margin-bottom:0;">&#9285; Valid for 5 minutes only</p>
+        <p style="color:#ff6b6b;font-size:12px;font-weight:600;margin-top:15px;margin-bottom:0;">⏱️ Valid for 5 minutes only</p>
       </div>
 
       <!-- BADGES -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:25px;">
         <tr>
-          <td width="32%" style="padding:4px;">
+          <td width="33%" style="padding:4px;">
             <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 5px;text-align:center;">
-              <div style="font-size:18px;">&#128274;</div>
+              <div style="font-size:18px;">🔒</div>
               <div style="color:#475569;font-size:10px;margin-top:4px;font-weight:700;">Secure</div>
             </div>
           </td>
-          <td width="32%" style="padding:4px;">
+          <td width="33%" style="padding:4px;">
             <div style="background:#fefce8;border:1px solid #fef08a;border-radius:10px;padding:12px 5px;text-align:center;">
-              <div style="font-size:18px;">&#9889;</div>
+              <div style="font-size:18px;">⚡</div>
               <div style="color:#854d0e;font-size:10px;margin-top:4px;font-weight:700;">Single Use</div>
             </div>
           </td>
-          <td width="32%" style="padding:4px;">
+          <td width="33%" style="padding:4px;">
             <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 5px;text-align:center;">
-              <div style="font-size:18px;">&#127973;</div>
+              <div style="font-size:18px;">🧠</div>
               <div style="color:#166534;font-size:10px;margin-top:4px;font-weight:700;">Health AI</div>
             </div>
           </td>
@@ -246,7 +246,7 @@ def build_otp_email(otp: str, context: str = "Login") -> str:
       </table>
 
       <!-- WARNING -->
-      <div style="background:#fff5f5;border-left:4px solid #feb2b2;border-radius:4px;padding:15px;">
+      <div style="background:#fff5f5;border-left:4px solid #feb2b2;border-radius:8px;padding:15px;">
         <p style="color:#c53030;font-size:12px;margin:0;line-height:1.5;">
           <strong>Security Notice:</strong> If you did not request this code, please ignore this email. Your account remains protected.
         </p>
@@ -256,7 +256,7 @@ def build_otp_email(otp: str, context: str = "Login") -> str:
     <!-- FOOTER -->
     <tr><td style="background:#f8fafc;padding:25px 40px;text-align:center;border-top:1px solid #edf2f7;">
       <p style="color:#2d3e50;font-size:13px;font-weight:700;margin:0 0 4px;">Harsha Pvt Limited</p>
-      <p style="color:#718096;font-size:11px;margin:0 0 15px;">AI Healthcare Technology &bull; MRI Analysis Platform</p>
+      <p style="color:#718096;font-size:11px;margin:0 0 15px;">AI Healthcare Technology • MRI Analysis Platform</p>
       <p style="color:#a0aec0;font-size:10px;margin:0;">&copy; 2025 Harsha Pvt Limited. All rights reserved.</p>
     </td></tr>
 
@@ -265,8 +265,6 @@ def build_otp_email(otp: str, context: str = "Login") -> str:
 </table>
 </body></html>
 """
-
-
 # ============================================================
 # GOOGLE OAUTH CONSTANTS
 # ============================================================
